@@ -15,6 +15,19 @@ Each entry: date and time (Asia/Riyadh), what changed, why. `CLAUDE.md` is kept 
 - **Why:** no approved source gives the complete Two Sahihs in usable form: HadeethEnc is curated, Dorar's API is search-only, and the Shamela database keeps text only in a 14.1 GB Lucene index (see SOURCES.md). Texts outside the index get `not_found`, never "false". Approved by Rolan.
 - **Flag:** this narrows the "Scope" line in Part 1. It must be stated in README and LIMITATIONS.md.
 
+## 2026-10-03 17:55 — Learning paths added (structure only)
+- **What:** TryHackMe-style learning paths (path → module → lesson) about Islam and Islamic law. Structure only; paths stay empty until the team supplies content. Content comes only from the team, a mentor or approved sources; the AI never writes lessons or rulings. Progress lives in the visitor's browser (localStorage), no accounts. Lessons can send a text to the verifier. Planned for Phase 2.
+- **Why:** team wants a learning platform with the verifier as its validity checker. Fits Track 4 ("knowledge and verification tools").
+- **Flags:** changes the Part 1 scope; the Part 6 out-of-scope message still applies to the verifier only. Islamic-law lessons touch levels C/D, so content needs human review. A path must be filled before the demo (Mon 5 Oct 18:00) or the section looks unfinished. Estimated cost 6–8 hours.
+
+## 2026-10-03 17:55 — Home layout and visual style
+- **What:** home shows learning paths and the verifier side by side; the verifier is the working core. Dark theme with gold accent, Quran text in the KFGQPC Uthmani font, readable contrast.
+- **Why:** team choice and reference images.
+
+## 2026-10-03 17:55 — Cuts to pay for learning paths
+- **What:** dropped the Ollama adapter (keep OpenAI-compatible and `none`) and the keyword-search baseline (keep the no-retrieval LLM baseline).
+- **Why:** frees about the time learning paths need. **Flag:** changes Part 7 (evaluation baselines).
+
 ## 2026-10-03 17:38 — KFGQPC Quran license accepted as documented
 - **What:** we use the KFGQPC Hafs files without an explicit license grant, display the text unchanged, and credit the Complex.
 - **Why:** the developer platform publishes the files for application developers, and the Complex's site policy excepts files it makes available for public use. Recorded in SOURCES.md; to be noted in LIMITATIONS.md. Approved by Rolan.

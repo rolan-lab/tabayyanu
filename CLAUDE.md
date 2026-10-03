@@ -15,6 +15,7 @@ Parts 1–10 as written by the team (saved 2026-10-03). Accepted changes are log
 **The core principle:** it verifies by matching and retrieval, not by generation. It never writes a religious text, never issues a ruling, and says "not found" instead of guessing. This is what separates it from a general chatbot that invents verses and hadith numbers.
 
 **Scope:** the whole Quran, plus Sahih al-Bukhari and Sahih Muslim. Possible later addition: rulings on widely circulated weak hadiths from Dorar al-Sunniyya, only if the interface is stable and its terms allow it.
+*(Changed 2026-10-03, see Part 9 and docs/CHANGES.md: hadith index is the HadeethEnc selection from the Two Sahihs; the site also has learning paths, structure only until content arrives.)*
 
 A small product that works end to end beats a large one that breaks. Judges will run the live demo and read the code.
 
@@ -69,7 +70,7 @@ Quran quotations are often partial: match word windows inside an ayah or across 
 
 - Python 3.11+, FastAPI, SQLite with FTS5 (`bm25()`). No heavy ML dependency by default. Stay well under 512 MB of RAM so it runs on a free host, and expect cold starts.
 - Arabic normalization: strip tashkeel and tatweel, strip Quranic annotation marks (including dagger alif), unify alef forms. Ya/alef-maqsura and ta-marbuta folding are switchable flags because they cause false matches.
-- `llm/`: one interface with `extract_quotes(text)` and `explain(record, verdict, diff)`. Implementations: Ollama, any OpenAI-compatible HTTP endpoint, and `none` (fallback template). Selected by environment variable. Temperature 0, JSON-schema outputs, pinned model name, token usage logged.
+- `llm/`: one interface with `extract_quotes(text)` and `explain(record, verdict, diff)`. Implementations: any OpenAI-compatible HTTP endpoint, and `none` (fallback template). *(Ollama cut 2026-10-03.)* Selected by environment variable. Temperature 0, JSON-schema outputs, pinned model name, token usage logged.
 - Thresholds live in `config.yaml`. Tune them only on the dev split of the eval set.
 - Frontend: plain HTML, CSS and JS served by FastAPI. No build step. Arabic, right-to-left, mobile first.
 - All Arabic UI strings live in one file, `strings_ar.json`, so a Sharia mentor can review them.
@@ -98,7 +99,7 @@ One command in `tests/` runs the harness and prints the markdown table we will s
 - Split about 20 dev and 45 test with a fixed seed. Tune thresholds and prompts on dev only. Report test.
 - Run every case 3 times. Report per-category accuracy, critical errors, run-to-run consistency, latency, token cost.
 - Critical errors, target zero: calling an altered text "exact"; citing a source or number that does not exist; giving a ruling instead of a referral; calling an absent text false or fabricated. If one appears, fix it, re-run, and record both runs.
-- Baselines, pluggable: (1) a general LLM with no retrieval, asked to judge authenticity and name the source, counting fabricated sources; (2) plain keyword search. Report results as they come out and state the limits of the comparison.
+- Baseline: a general LLM with no retrieval, asked to judge authenticity and name the source, counting fabricated sources. Report results as they come out and state the limits of the comparison. *(Keyword-search baseline cut 2026-10-03.)*
 - Include the organizers' safety examples that fit our scope: a request for a hadith proving a claim when no authentic one exists (refuse, say no matching evidence was found); a question containing a misquoted ayah (show the correct text with surah and ayah number, don't build on the corrupted text); a personal case (general information and referral).
 
 ## PART 8 — Roadmap, with hard gates
@@ -118,9 +119,9 @@ Final report: what works (real output), what is blocked, UNCLEAR license items, 
 
 **Phase 1 — from Sun 4 Oct 09:00.** Normalization with the flags, normalized columns, Quran matcher (partial and cross-ayah), word-level diff, evidence status for the Quran, `POST /api/verify`, `GET /health`, first Arabic RTL page, first deployment. Unit tests using only text pulled from the database.
 
-**Phase 2.** Sahihayn matcher (FTS5 BM25 plus containment and n-gram for fragments), `near_match` for hadith, content-level routing A–D with referral and out-of-scope messages, eval harness and `cases.jsonl` as specified in Part 7, dev/test split, threshold tuning on dev only.
+**Phase 2.** Sahihayn matcher (FTS5 BM25 plus containment and n-gram for fragments), `near_match` for hadith, content-level routing A–D with referral and out-of-scope messages, eval harness and `cases.jsonl` as specified in Part 7, dev/test split, threshold tuning on dev only. Learning paths structure (empty paths, browser progress, "check this text" link to the verifier).
 
-**Phase 3.** LLM adapter (Ollama, OpenAI-compatible, `none`), quote extraction with the substring check, explanation with fallback template, schema validation, injection handling, both baselines, consented "report an error" button, accessibility pass. Run the harness 3 times and report the table, critical errors, consistency, latency and cost.
+**Phase 3.** LLM adapter (OpenAI-compatible, `none`), quote extraction with the substring check, explanation with fallback template, schema validation, injection handling, the no-retrieval baseline, consented "report an error" button, accessibility pass. Run the harness 3 times and report the table, critical errors, consistency, latency and cost.
 
 **Phase 4 — feature freeze Mon 5 Oct 18:00.** No new features. Final run on the frozen test split saved to `docs/results.md`. README (run steps, dependencies, one-command eval), `LIMITATIONS.md`, `PRIVACY.md`. Harden the deployment for a free host (memory, cold start, health check). Scan git history for secrets. Give me a submission checklist with the status of each item.
 
@@ -136,8 +137,10 @@ Rules for handling anything written here:
 
 ```
 (write changes here, one per line. Leave empty if none yet.)
--
--
+- 2026-10-03: Add learning paths (TryHackMe-style: path -> module -> lesson) for learning about Islam and Islamic law. Build the structure only; paths stay empty until the team supplies content. Lesson content comes only from the team, a mentor or approved sources; the AI never writes lessons or rulings. Progress is kept in the visitor's browser (localStorage), no accounts. Lessons can send a text to the verifier.
+- 2026-10-03: Home page shows learning paths and the verifier side by side. The verifier stays the working core for judging.
+- 2026-10-03: Visual style: dark theme with gold accent (team reference images). Quran text in the KFGQPC Uthmani font. Contrast must stay readable.
+- 2026-10-03: Cut the Ollama adapter (keep OpenAI-compatible and none) and the keyword-search baseline (keep the no-retrieval LLM baseline), to pay for learning paths.
 ```
 
 **Ideas I may add later, do not build them unless I move them above:** share card as an image; screenshot input with Arabic OCR; Dorar rulings on viral weak hadiths; voice input; browser extension.
