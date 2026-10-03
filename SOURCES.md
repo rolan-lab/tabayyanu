@@ -32,7 +32,7 @@ Dorar or Shamela.
 | What we take | `kfgqpc_hafs_v30-data/kfgqpc_hafs_v30.json`: 6,236 records with `sura_no`, `aya_no`, `aya_text_unicode` (Uthmani script, full diacritics, ends with U+06DD + ayah number), `aya_text_emlaey` (plain spelling "used for search purpose"). Riwaya: Hafs. |
 | Downloaded | 2026-10-03 by `scripts/ingest.py` (cached in `data/raw/qurancomplex/`) |
 | Terms | The platform page has no license text, only "جميع الحقوق محفوظة". The Complex's site policy (https://policy.qurancomplex.gov.sa, section "ترخيص الاستخدام") says all site content is the Complex's property, protected by copyright, except services, computer files and software tools that the Complex declares available for public use. The developer platform presents these files as intended for building applications. |
-| License | **UNCLEAR.** Use in an application looks intended (that is the platform's stated purpose), but there is no explicit license grant or attribution requirement written anywhere we found. We display the text unmodified and credit the Complex. |
+| License | **UNCLEAR, accepted by the team (2026-10-03, see docs/CHANGES.md).** Use in an application looks intended (that is the platform's stated purpose), but there is no explicit license grant or attribution requirement written anywhere we found. We display the text unmodified and credit the Complex; LIMITATIONS.md will note this. |
 
 ## 2. Hadith: HadeethEnc (موسوعة الأحاديث النبوية), API v1
 
