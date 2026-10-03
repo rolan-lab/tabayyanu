@@ -1,0 +1,21 @@
+# Secrets
+.env
+
+# Data (downloaded and built by scripts/ingest.py, never committed)
+data/raw/*
+data/db/*
+!data/raw/.gitkeep
+!data/db/.gitkeep
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+
+# Editors / OS
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store
