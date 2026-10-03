@@ -66,6 +66,25 @@ Dorar or Shamela.
 | What we take | **Nothing.** Inspected only (initialize + tools/list). It adds no hadith data beyond source 2. Not used at runtime, per CLAUDE.md. |
 | Terms | Not found in the server's responses. **UNCLEAR**, but irrelevant while we take nothing from it. |
 
+## 4b. Terminology: terminologyenc.com (موسوعة المصطلحات الإسلامية)
+
+| | |
+|---|---|
+| Site | https://terminologyenc.com/ar (listed in the organizers' file, page 10, as a site to browse) |
+| API | **Undocumented.** No API docs or developer page found on the site or by web search. The HadeethEnc-style paths answer: `/api/v1/languages` (22 languages), `/api/v1/categories/roots/?language=ar` (16 roots), `/api/v1/terms/list/?language=ar&category_id=..`, `/api/v1/terms/one/?language=ar&id=..`. A term has `term, idio_def, brief_expl, brief_ling_def, ling_def, value, root, categories, translations` (`scripts/inspect_terminologyenc.py`). |
+| What we take | **Nothing yet.** Possible Phase 3 use: short definitions of terms shown in results (e.g. صحيح, متفق عليه). |
+| Terms | No terms page on the site. The about page calls it a free, reliable reference and says its aim includes providing translations in electronic formats for portals and applications. Run by the Association, so the free-use statement in the reference file (page 8) applies. |
+| License | Content: free use per the Association statement. Endpoints: undocumented, so they may change without notice. |
+
+## 4c. Association Central DB: icadb.com
+
+| | |
+|---|---|
+| API | https://icadb.com/api/docs/ (Swagger UI behind a login page). Its OpenAPI schema at `https://icadb.com/api/docs/?format=openapi` is public and describes a "Public read-only API" with 27 paths; it declares HTTP Basic auth, but list and export endpoints answered without credentials (`scripts/inspect_icadb.py`). |
+| Hadith content | Encyclopedia "موسوعة الأحاديث" (external_id 101, 842 cards) and "موسوعة الأحاديث الإصدار الأول" (external_id 117, 3,552 cards). Card fields: title, matn, grade (درجة الحديث), attribution (التخريج), meaning, word meanings, benefits, references. Cards carry `old_id` values in HadeethEnc's id range: this is the HadeethEnc material, not additional hadith. "موسوعة شرح صحيح مسلم (الدرر السنية)" (external_id 130) has 0 cards. |
+| What we take | **Nothing.** Adds no coverage over source 2. Not used at runtime (CLAUDE.md, Part 3). |
+| License | Free per the Association statement (reference file, page 8); the homepage says the data is available free through APIs or downloadable copies. |
+
 ## 5. Shamela (المكتبة الشاملة), inspected, text not used
 
 | | |
