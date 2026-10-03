@@ -1,0 +1,125 @@
+﻿Database: C:\Users\rwlan\OneDrive\Desktop\tabynoo\data\db\tabayyanu.sqlite  (sample seed 20261003)
+
+== Quran (quran_ayat) ==
+  ayat: 6236 (expected 6236)
+  surahs: 114 (min 1, max 114, expected 114)
+  surahs with gaps in ayah numbering: 0
+  duplicate (surah, ayah) pairs: 0
+  ids not in surah:ayah order: 0
+  empty text_raw: 0
+  empty text_emlaey: 0
+  text_raw whose trailing ayah marker number != ayah column: 0
+  ANOMALY: text_emlaey contains U+200E LEFT-TO-RIGHT MARK x5 at ['17:2', '19:31', '21:112', '69:27', '77:26']
+  text_emlaey rows containing tatweel (U+0640): 283 (noted; Phase 1 normalization strips it)
+
+  Random sample of 5 ayat (compare by eye with a printed Mushaf):
+   [2:34] وَإِذۡ قُلۡنَا لِلۡمَلَٰٓئِكَةِ ٱسۡجُدُواْ لِأٓدَمَ فَسَجَدُوٓاْ إِلَّآ إِبۡلِيسَ أَبَىٰ وَٱسۡتَكۡبَرَ وَكَانَ مِنَ ٱلۡكَٰفِرِينَ ۝٣٤
+   [2:224] وَلَا تَجۡعَلُواْ ٱللَّهَ عُرۡضَةࣰ لِّأَيۡمَٰنِكُمۡ أَن تَبَرُّواْ وَتَتَّقُواْ وَتُصۡلِحُواْ بَيۡنَ ٱلنَّاسِۚ وَٱللَّهُ سَمِيعٌ عَلِيمࣱ ۝٢٢٤
+   [8:15] يَٰٓأَيُّهَا ٱلَّذِينَ ءَامَنُوٓاْ إِذَا لَقِيتُمُ ٱلَّذِينَ كَفَرُواْ زَحۡفࣰا فَلَا تُوَلُّوهُمُ ٱلۡأَدۡبَارَ ۝١٥
+   [23:103] وَمَنۡ خَفَّتۡ مَوَٰزِينُهُۥ فَأُوْلَٰٓئِكَ ٱلَّذِينَ خَسِرُوٓاْ أَنفُسَهُمۡ فِي جَهَنَّمَ خَٰلِدُونَ ۝١٠٣
+   [56:17] يَطُوفُ عَلَيۡهِمۡ وِلۡدَٰنࣱ مُّخَلَّدُونَ ۝١٧
+
+== Hadith (hadith) ==
+  HadeethEnc: sum of hadeeths_count over 7 root categories = 4273
+  HadeethEnc: unique record ids downloaded = 3574 (difference = records filed under more than one root category)
+  HadeethEnc does not state a total for Sahih al-Bukhari or Sahih Muslim; it is a curated selection.
+  bukhari: 1785 rows, 956 distinct numbers, 807 without a number, number range 3..7540
+  ANOMALY: bukhari: 807 rows have no parsable number
+  bukhari: numbers cited by more than one HadeethEnc record: 22 (expected; different records can quote the same hadith)
+  ANOMALY: bukhari: 12 numbers are not a single integer, e.g. ['5008-5009', '1180، 1181', '272، 273', '1258 - 1259', '5342- 5343', '5262، 5263', '5692 - 5693', '4968، 4967']
+  muslim: 2055 rows, 1096 distinct numbers, 901 without a number, number range 3..3029
+  ANOMALY: muslim: 901 rows have no parsable number
+  muslim: numbers cited by more than one HadeethEnc record: 56 (expected; different records can quote the same hadith)
+  ANOMALY: muslim: 2 numbers are not a single integer, e.g. ['877، 878، 891', '2273، 2274']
+  rows with book = NULL: 3840 (HadeethEnc references give volume/page, not the kitab name)
+  empty text_raw: 0
+  grade values (exactly as given):
+     3799  'صحيح'
+       11  'صحيحان'
+        5  'حسن'
+        2  'صحيحة'
+        2  'صحيح، وزيادة أبي داود صحيحة'
+        2  'صحيح.\nرواية جابر: صحيحة'
+        2  'صحيح وحديث جابر حسن'
+        2  'صحيح بكل رواياته'
+        2  'صحيح بشواهده'
+        2  'صحيح الإسناد'
+        2  'حديث ابن عباس: صحيح.\nحديث النزال: صحيح.\nحديث عبد الله بن عمرو: حسن'
+        2  'حديث أبي ذر ضعيف، وحديث معيقيب صحيح'
+        1  'صحيحان، والحديث الأول موقوف على أبي هريرة، والثاني مرفوع'
+        1  'صحيح, لكن قوله: ((تقول امرأته ..... )) مدرجٌ من قول أبي هريرة'
+        1  'صحيح وهو موقوف هلى أنس بن مالك'
+        1  'صحيح موقوفًا على أبي بكر الصديق -رضي الله عنه'
+        1  'صحيح لغيره'
+        1  'صحيح بروايتيه'
+        1  'حديث أبي قتادة: صحيح.\nحديث ابن أبي أوفى: صحيح'
+  ANOMALY: 5 records: attribution 'متفق عليه' but reference cites ['muslim'] (e.g. HadeethEnc id 5907)
+  ANOMALY: 13 records: attribution 'رواه مسلم' but reference cites ['bukhari', 'muslim'] (e.g. HadeethEnc id 8402)
+  ANOMALY: 18 records: attribution 'رواه البخاري' but reference cites ['bukhari', 'muslim'] (e.g. HadeethEnc id 65250)
+  ANOMALY: 27 records: attribution 'متفق عليه' but reference cites ['bukhari'] (e.g. HadeethEnc id 65298)
+  ANOMALY: 17 records attributed 'متفق عليه' have no parsable Sahih reference line (e.g. HadeethEnc id 6212); not ingested
+  ANOMALY: 11 records attributed 'رواه مسلم' have no parsable Sahih reference line (e.g. HadeethEnc id 6217); not ingested
+  ANOMALY: 4 records attributed 'رواه البخاري' have no parsable Sahih reference line (e.g. HadeethEnc id 5835); not ingested
+  parser spot-check: 8/8 correct
+  first token after the collection name in accepted citations:
+     1536  '(nothing)'
+      579  '(1/'
+      484  '(4/'
+      335  '(3/'
+      330  '(2/'
+      120  '(8/'
+       87  '(7/'
+       81  '–الجامع'
+       75  '(5/'
+       71  '(6/'
+       54  '(9/'
+       22  'المحقق:'
+       20  '-الجامع'
+        9  'بن'
+        8  '-أبو'
+  ANOMALY: 49 reference lines have a bare '(vol/page) (number)' right after a Sahih citation; that extra number is not ingested (e.g. HadeethEnc id 65060)
+  attribution values over all downloaded records (top 12):
+     1253  'متفق عليه'
+      675  'رواه مسلم'
+      396  'رواه البخاري'
+      131  'رواه أبو داود'
+       95  'رواه الترمذي'
+       80  'رواه أحمد'
+       38  'رواه أبو داود وأحمد'
+       38  'رواه الترمذي وأحمد'
+       36  'رواه أبو داود والترمذي وابن ماجه وأحمد'
+       36  'رواه ابن ماجه'
+       32  'رواه أبو داود والترمذي'
+       32  'رواه الترمذي وابن ماجه وأحمد'
+
+  Random sample of 5 hadith (compare by eye with a printed edition):
+   [bukhari 2416] grade='صحيح'  https://hadeethenc.com/ar/browse/hadith/2980
+     ref: صحيح البخاري (3/ 121) (2416).
+     عَنْ عَبْدِ اللَّهِ بنِ مَسْعُودٍ رَضِيَ اللَّهُ عَنْهُ قَالَ: قَالَ رَسُولُ اللَّهِ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ: «مَنْ حَلَفَ عَلَى يَمِينٍ وَهُوَ فِيهَا فَاجِرٌ لِيَقْتَطِعَ بِهَا مَالَ امْرِئٍ مُسْلِمٍ، لَقِيَ اللَّهَ وَهُوَ عَلَيْهِ غَضْبَانُ». قَالَ: فَقَالَ الْأَشْعَثُ: فِيَّ وَاللَّهِ كَانَ ذَلِكَ؛ كَانَ بَيْنِي وَبَيْنَ رَجُلٍ مِنَ الْيَهُودِ أَرْضٌ، فَجَحَدَنِي، فَقَدَّمْتُهُ إِلَى النَّبِيِّ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ فَقَالَ لِي رَسُولُ اللَّهِ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ: «أَلَكَ بَيِّنَةٌ؟» قُلْتُ: لَا. قَالَ: فَقَالَ لِلْيَهُودِيِّ: «احْلِفْ». قَالَ: قُلْتُ: يَا رَسُولَ اللَّهِ، إِذَنْ يَحْلِفَ وَيَذْهَبَ بِمَالِي. فَأَنْزَلَ اللَّهُ تَعَالَى: {إِنَّ الَّذِينَ يَشْتَرُونَ بِعَهْدِ اللَّهِ وَأَيْمَانِهِمْ ثَمَنًا قَلِيلًا}. إِلَى آخِرِ الْآيَةِ.
+   [bukhari None] grade='صحيح'  https://hadeethenc.com/ar/browse/hadith/4226
+     ref: صحيح البخاري
+     عن ابن مسعود رضي الله عنه قال: صليت مع النبي صلى الله عليه وسلم ليلة، فأطال القيام حتى هَمَمْتُ بأمْرِ سُوءٍ! قيل: وما هَمَمْتَ به؟ قال: هَمَمْتُ أن أجلس وأَدَعَه.
+   [bukhari None] grade='صحيح'  https://hadeethenc.com/ar/browse/hadith/6081
+     ref: صحيح البخاري
+     عن جابر بن عبد الله رضي الله عنهما قال: (جعل وفي لفظ: قضى) النبي صلى الله عليه وسلم بالشُّفْعة في كل ما لم يقسم، فإذا وقعت الحدود، وصُرِّفَتِ الطرق؛ فلا شفعة).
+   [muslim None] grade='صحيح'  https://hadeethenc.com/ar/browse/hadith/6377
+     ref: صحيح مسلم  المحقق: محمد فؤاد عبد الباقي - الناشر: دار إحياء التراث العربي – بيروت.
+     عن أبي هريرة رضي الله عنه عن النبي صلى الله عليه وسلم قال: «لا تَرْغَبُوا عن آبائكم، فمن رغب عن أبيه، فهو كفر».
+   [bukhari 3372] grade='صحيح'  https://hadeethenc.com/ar/browse/hadith/66295
+     ref: صحيح البخاري (4/ 147) (3372)
+     عَنْ أَبِي هُرَيْرَةَ رَضِيَ اللَّهُ عَنْهُ أَنَّ رَسُولَ اللَّهِ صَلَّى اللهُ عَلَيْهِ وَسَلَّمَ، قَالَ: «نَحْنُ أَحَقُّ بِالشَّكِّ مِنْ إِبْرَاهِيمَ إِذْ قَالَ: {رَبِّ أَرِنِي كَيْفَ تُحْيِي المَوْتَى قَالَ أَوَلَمْ تُؤْمِنْ قَالَ بَلَى وَلَكِنْ لِيَطْمَئِنَّ قَلْبِي} [البقرة: 260] وَيَرْحَمُ اللَّهُ لُوطًا، لَقَدْ كَانَ يَأْوِي إِلَى رُكْنٍ شَدِيدٍ، وَلَوْ لَبِثْتُ فِي السِّجْنِ طُولَ مَا لَبِثَ يُوسُفُ لَأَجَبْتُ الدَّاعِيَ».
+
+== Summary: 13 anomalies ==
+  - text_emlaey contains U+200E LEFT-TO-RIGHT MARK x5 at ['17:2', '19:31', '21:112', '69:27', '77:26']
+  - bukhari: 807 rows have no parsable number
+  - bukhari: 12 numbers are not a single integer, e.g. ['5008-5009', '1180، 1181', '272، 273', '1258 - 1259', '5342- 5343', '5262، 5263', '5692 - 5693', '4968، 4967']
+  - muslim: 901 rows have no parsable number
+  - muslim: 2 numbers are not a single integer, e.g. ['877، 878، 891', '2273، 2274']
+  - 5 records: attribution 'متفق عليه' but reference cites ['muslim'] (e.g. HadeethEnc id 5907)
+  - 13 records: attribution 'رواه مسلم' but reference cites ['bukhari', 'muslim'] (e.g. HadeethEnc id 8402)
+  - 18 records: attribution 'رواه البخاري' but reference cites ['bukhari', 'muslim'] (e.g. HadeethEnc id 65250)
+  - 27 records: attribution 'متفق عليه' but reference cites ['bukhari'] (e.g. HadeethEnc id 65298)
+  - 17 records attributed 'متفق عليه' have no parsable Sahih reference line (e.g. HadeethEnc id 6212); not ingested
+  - 11 records attributed 'رواه مسلم' have no parsable Sahih reference line (e.g. HadeethEnc id 6217); not ingested
+  - 4 records attributed 'رواه البخاري' have no parsable Sahih reference line (e.g. HadeethEnc id 5835); not ingested
+  - 49 reference lines have a bare '(vol/page) (number)' right after a Sahih citation; that extra number is not ingested (e.g. HadeethEnc id 65060)
