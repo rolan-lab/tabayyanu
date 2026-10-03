@@ -3,9 +3,9 @@
 What existed in this repository before the challenge build window
 (Sun 4 Oct 2026 09:00 – Tue 6 Oct 2026 23:59, Asia/Riyadh).
 
-- Written: Sat 2026-10-03 16:07 Asia/Riyadh (UTC+3)
-- Latest commit when written: `bb1199e27a859b83d535931aca08e6d9e24ee7b0`
-  (this file is added in the commit right after it)
+- Written: Sat 2026-10-03 16:07 Asia/Riyadh (UTC+3); updated 16:47 the same day
+- Latest commit when updated: `52292c833414be79f06823763276eca31b3e5cc9`
+  (this update is committed right after it; the full pre-start history is in `git log`)
 
 ## Files in the repository
 
@@ -18,6 +18,7 @@ What existed in this repository before the challenge build window
 | `scripts/inspect_qurancomplex.py` | Downloads the KFGQPC Hafs package, checks SHA-256, prints its structure |
 | `scripts/inspect_hadeethenc.py` | Prints real HadeethEnc API responses |
 | `scripts/inspect_dorar.py` | Prints real Dorar JSON search responses |
+| `scripts/inspect_shamela.py` | Reads the Shamela database zip's file index over HTTP range requests and fetches its book catalogue only |
 | `scripts/ingest.py` | Downloads source data into `data/raw/` and builds `data/db/tabayyanu.sqlite` (tables `quran_ayat`, `hadith`; no normalization) |
 | `scripts/verify_data.py` | Reports counts, gaps, duplicates and anomalies in the database; changes nothing |
 | `docs/phase0_verify_output.txt` | Output of `verify_data.py` on 2026-10-03 |
@@ -31,6 +32,8 @@ Not in git (ignored): `data/raw/` (downloaded source files), `data/db/` (built d
 - Hadith: 3,574 HadeethEnc records downloaded; 1,785 rows citing Sahih al-Bukhari and 2,055 citing
   Sahih Muslim (about 1,700 without a hadith number in the source reference). A curated selection,
   not the complete Two Sahihs. Details and anomalies: `docs/phase0_verify_output.txt`.
+- Shamela: catalogue (`master.db`) and one book page map (`book_1727.db`) in `data/raw/shamela/`.
+  No book text: Shamela keeps text in a 14.1 GB Lucene index that was not downloaded.
 
 ## Not yet written
 
@@ -39,8 +42,8 @@ LLM adapter or evaluation harness.
 
 ## Open questions (team decision pending)
 
-1. Hadith scope: use the HadeethEnc subset, or seek a licensed full copy of the Two Sahihs
-   (Shamela terms do not permit bulk extraction).
+1. Hadith scope: use the HadeethEnc subset, or obtain full texts of the Two Sahihs. The Shamela
+   database listed by the organizers stores text only in a 14.1 GB Lucene index (see SOURCES.md).
 2. Extra columns beyond the planned schema: `text_emlaey`, `source_record_id`, `attribution`, `ref_raw`.
 3. KFGQPC Quran files: no explicit license found (see SOURCES.md).
 

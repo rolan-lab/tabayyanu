@@ -6,6 +6,20 @@ an explicit statement that covers our use, and the team must decide or ask.
 
 Checked on: 2026-10-03 (Asia/Riyadh).
 
+## 0. Organizers' reference file
+
+"المرجعية والحزمة العلمية والبيانات", version dated 20/3/1448, 15 pages, issued by the
+challenge organizers. Cited only; the file is not redistributed in this repository.
+It sets the approved references per domain (page 3–4), the content levels A–D (page 2),
+the required output standards (page 5), safety test cases (page 6), a terminology sample
+(page 7) and the platform list (pages 8–15).
+
+Relevant to licensing: page 8 records the Association for Multilingual Islamic Content
+statement of 17 Sep 2026 that its content is free for individuals and organizations and
+available through public APIs and an MCP server. This covers the Association's platforms
+(HadeethEnc, QuranEnc, IslamHouse, terminologyenc, icadb), not the King Fahd Complex,
+Dorar or Shamela.
+
 ---
 
 ## 1. Quran text: King Fahd Glorious Quran Printing Complex (KFGQPC), developer platform
@@ -30,7 +44,7 @@ Checked on: 2026-10-03 (Asia/Riyadh).
 | Coverage | **A curated selection, not the complete Two Sahihs.** About 4,273 records across all categories (sum over root categories; a record can sit in more than one category). Matn wording is HadeethEnc's, often taken from compilations such as Riyad al-Salihin or Umdat al-Ahkam, and can merge narrations (for example "وفي لفظ للبخاري"). |
 | Downloaded | 2026-10-03 by `scripts/ingest.py` (cached in `data/raw/hadeethenc/`) |
 | Terms | Stated on the API docs overview: content may be used on two conditions: no modification, addition or deletion of content, and clear attribution to the publisher and the source (HadeethEnc.com). Quote: "No modification, addition, or deletion of the content." |
-| License | Clear for our use, provided we show text unmodified (normalized copies are for matching only, never displayed as the source) and credit HadeethEnc.com with a link. |
+| License | Clear for our use (also covered by the Association statement in the reference file, page 8), provided we show text unmodified (normalized copies are for matching only, never displayed as the source) and credit HadeethEnc.com with a link. |
 
 ## 3. Hadith search: Dorar al-Sunniyya (الدرر السنية), JSON API
 
@@ -52,12 +66,16 @@ Checked on: 2026-10-03 (Asia/Riyadh).
 | What we take | **Nothing.** Inspected only (initialize + tools/list). It adds no hadith data beyond source 2. Not used at runtime, per CLAUDE.md. |
 | Terms | Not found in the server's responses. **UNCLEAR**, but irrelevant while we take nothing from it. |
 
-## 5. Shamela (المكتبة الشاملة), not used
+## 5. Shamela (المكتبة الشاملة), inspected, text not used
 
 | | |
 |---|---|
-| Terms | https://shamela.ws/page/terms (Shamela MCP terms, last updated 19 Sep 2026): read-only research and citation service; forbids rebuilding the full index beyond published limits; rights in books and editions stay with their holders, and the terms grant no reuse rights beyond that. |
-| Status | **Not used. UNCLEAR / likely not permitted** for bulk extraction of Bukhari and Muslim. Pending a team decision (see START_STATE.md, open questions). |
+| Listed by organizers | Reference file page 15: full database at https://shamela.ws/page/download → `https://dev.shamela.ws/downloads/shamela-database-1448.zip` (13,294,044,352 bytes, Last-Modified 30 Jul 2026). |
+| What we did | `scripts/inspect_shamela.py` reads only the zip's central directory over HTTP range requests (about 1 MB), then fetches the catalogue `database/master.db` (980 KB compressed) into `data/raw/shamela/`. We also fetched one book file, `database/book/727/1727.db` (121 KB compressed), to check its schema. |
+| What we found | 9,825 entries. Catalogue has 8,593 books. Editions: Sahih Muslim "ت عبد الباقي" is book 1727 (group 711); Sahih al-Bukhari "ط السلطانية" is book 1681 (group 1681). Per-book `.db` files hold only a page map (`page`: id, part, page, number) and a heading tree (`title`), **no text**. Book text lives in a Lucene index, `database/store/page/` (94 files, 14.1 GB), shared by all books. |
+| Server behaviour | Cloudflare. Back-to-back range requests, or a range request after a HEAD on the same session, get a full 200 response instead of 206; requests spaced 3 s apart get 206. The script spaces requests and refuses any non-206 response before reading its body. |
+| Terms | https://shamela.ws/page/terms is the only terms page linked (from the download page too). It covers the Shamela MCP service: read-only research and citation; no rebuilding of the full index beyond published limits; rights in books and editions stay with their holders and the terms grant no reuse rights. The download page itself states no license. |
+| Status | **Text not used.** Extracting the two Sahihs would need most of the 14.1 GB Lucene index plus a custom decoder. License for reuse: **UNCLEAR** (organizers list the download as an approved resource; Shamela's own terms grant no reuse rights). |
 
 ---
 
