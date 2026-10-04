@@ -114,3 +114,15 @@ def test_hallucinated_extraction_is_discarded(monkeypatch, ayat):
     fake_endpoint(monkeypatch, [{"quotes": [other]}] + [{"explanation": "شرح قصير."}] * 4)
     refs = [i["source"]["ref"] for i in v.verify(post)["items"] if i.get("source")]
     assert refs and all(other not in json.dumps(refs, ensure_ascii=False) for _ in refs)
+
+
+def test_baseline_reference_checker(db):
+    from tests.baseline_llm import check_reference
+    s, a = db.execute("SELECT surah, ayah FROM quran_ayat WHERE id = 300").fetchone()
+    assert check_reference(f"{s}:{a}", f"quran:{s}:{a}", db) == "ok"
+    assert check_reference(f"{s}:{a + 1}", f"quran:{s}:{a}", db) == "fabricated"   # wrong place
+    assert check_reference("115:1", f"quran:{s}:{a}", db) == "fabricated"          # does not exist
+    assert check_reference("", None, db) == "none"
+    rid, coll, num = db.execute("SELECT source_record_id, collection, number FROM hadith WHERE number GLOB '[0-9]*' LIMIT 1").fetchone()
+    assert check_reference(f"{coll}:{num}", f"hadith:{rid}", db) == "ok"
+    assert check_reference(f"{coll}:99999", f"hadith:{rid}", db) == "fabricated"
