@@ -11,6 +11,8 @@ short_description: Verify Quran and Sahih hadith quotations against approved sou
 
 # تبيّنوا (Tabayyanu)
 
+**Live demo:** https://tabayyanu.onrender.com (free hosting: the first visit after a quiet period can take up to a minute to wake).
+
 A tool that checks quotations of the Quran and of hadith from the Two Sahihs
 against approved sources, and a home for step-by-step learning paths about Islam.
 Entry for the "AI Challenge Serving Islamic Content", Track 4 (knowledge and verification tools).
