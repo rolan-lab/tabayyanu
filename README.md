@@ -1,3 +1,14 @@
+---
+title: Tabayyanu
+emoji: 📖
+colorFrom: yellow
+colorTo: gray
+sdk: docker
+app_port: 7860
+pinned: false
+short_description: Verify Quran and Sahih hadith quotations against approved sources
+---
+
 # تبيّنوا (Tabayyanu)
 
 A tool that checks quotations of the Quran and of hadith from the Two Sahihs
