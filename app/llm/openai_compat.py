@@ -1,0 +1,65 @@
+"""Client for any OpenAI-compatible /chat/completions endpoint (temperature 0, JSON schema)."""
+import json
+import logging
+import time
+
+import requests
+
+from app.llm import validate_explanation, validate_quotes
+from app.llm.prompts import EXPLAIN_SCHEMA, EXPLAIN_SYSTEM, EXTRACT_SCHEMA, EXTRACT_SYSTEM, wrap_user_text
+
+log = logging.getLogger("tabayyanu.llm")
+TIMEOUT_S = 15
+
+
+class OpenAICompat:
+    name = "openai_compat"
+
+    def __init__(self, base_url: str, api_key: str, model: str):
+        self.url = base_url.rstrip("/") + "/chat/completions"
+        self.api_key = api_key
+        self.model = model  # pinned through LLM_MODEL
+        self.usage = {"calls": 0, "prompt_tokens": 0, "completion_tokens": 0, "failures": 0, "rejected": 0}
+
+    def _call(self, system: str, user: str, schema: dict) -> dict | None:
+        body = {
+            "model": self.model,
+            "temperature": 0,
+            "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}],
+            "response_format": {"type": "json_schema", "json_schema": schema},
+        }
+        started = time.monotonic()
+        try:
+            resp = requests.post(self.url, json=body, timeout=TIMEOUT_S,
+                                 headers={"Authorization": f"Bearer {self.api_key}"})
+            resp.raise_for_status()
+            data = resp.json()
+            usage = data.get("usage") or {}
+            self.usage["calls"] += 1
+            self.usage["prompt_tokens"] += usage.get("prompt_tokens", 0)
+            self.usage["completion_tokens"] += usage.get("completion_tokens", 0)
+            log.info("llm call ok model=%s prompt_tokens=%s completion_tokens=%s ms=%.0f", self.model,
+                     usage.get("prompt_tokens"), usage.get("completion_tokens"), (time.monotonic() - started) * 1000)
+            return json.loads(data["choices"][0]["message"]["content"])
+        except Exception as exc:  # network, HTTP, JSON or shape errors: caller falls back
+            self.usage["failures"] += 1
+            log.warning("llm call failed: %s", type(exc).__name__)
+            return None
+
+    def extract_quotes(self, text: str) -> list[str] | None:
+        out = self._call(EXTRACT_SYSTEM, wrap_user_text(text), EXTRACT_SCHEMA)
+        return self._count(validate_quotes(out.get("quotes"), text) if isinstance(out, dict) else None, out)
+
+    def explain(self, record: dict, verdict: str, diff: list, quote: str) -> str | None:
+        facts = {"status": verdict, "reference": record.get("ref"), "source": record.get("name"),
+                 "grade": record.get("grade"), "grade_source": record.get("grade_source"),
+                 "changes": [d for d in diff if d.get("op") != "equal"][:8]}
+        user = f"<record>\n{json.dumps(facts, ensure_ascii=False)}\n</record>\n{wrap_user_text(quote)}"
+        out = self._call(EXPLAIN_SYSTEM, user, EXPLAIN_SCHEMA)
+        return self._count(validate_explanation(out.get("explanation"), verdict) if isinstance(out, dict) else None, out)
+
+    def _count(self, value, raw):
+        """Count outputs that arrived but failed validation (the caller then falls back)."""
+        if value is None and raw is not None:
+            self.usage["rejected"] += 1
+        return value

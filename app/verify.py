@@ -11,6 +11,7 @@ from pathlib import Path
 import yaml
 
 from app.hadith import COLLECTION_NAMES, HadithIndex, HadithMatch
+from app.llm import get_llm
 from app.normalize import folded, strict
 from app.quran import Quran, QuranMatch
 
@@ -126,9 +127,10 @@ STATUS_ORDER = {"exact": 3, "lexical_diff": 2, "near_match": 1}
 
 
 class Verifier:
-    def __init__(self, db_path: str):
+    def __init__(self, db_path: str, llm=None):
         self.quran = Quran(db_path, CONFIG["normalize"], CONFIG["quran"])
         self.hadith = HadithIndex(db_path, CONFIG["normalize"], CONFIG["hadith"])
+        self.llm = llm or get_llm()
 
     def verify(self, text: str) -> dict:
         text = (text or "").strip()
@@ -147,7 +149,19 @@ class Verifier:
             items.append(self.message_item("out_of_scope", level))
         else:
             items = [self.verify_quote(text, level)]  # report the text once, not per segment
+        for item in items:
+            self.add_explanation(item)
         return {"items": items, "level": level}
+
+    def add_explanation(self, item: dict) -> None:
+        """LLM explanation for a found quotation; the template stays when the model is off or fails.
+        The verdict fields are never touched here."""
+        if item["kind"] != "quote" or item["status"] == "not_found":
+            return
+        text = self.llm.explain(item["source"], item["status"], item["diff"], item["quote"])
+        if text:
+            item["explanation"] = text
+            item["explanation_origin"] = "llm"
 
     def find_quotes(self, text: str, level: str) -> list[dict]:
         """Deterministic quotation finding (the LLM extractor, when enabled, comes first):
@@ -156,8 +170,15 @@ class Verifier:
         if bracketed:
             return [self.verify_quote(q, level) for q in bracketed]
         whole = self.verify_quote(text, level)
+        if whole["status"] == "exact":
+            return [whole]
+        extracted = self.llm.extract_quotes(text)  # validated: literal substrings only
+        if extracted:
+            items = [self.verify_quote(q, level) for q in extracted]
+            if any(i["status"] != "not_found" for i in items):
+                return items
         segments, dropped_short = sentence_segments(text)
-        if whole["status"] == "exact" or len(segments) < 2:
+        if len(segments) < 2:
             return [whole]
         parts = [self.verify_quote(q, level) for q in segments]
         if whole["status"] == "not_found":
