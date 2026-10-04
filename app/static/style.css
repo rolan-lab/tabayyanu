@@ -136,3 +136,9 @@ textarea:focus { border-color: var(--gold); }
 .paths-grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); margin-top: 14px; }
 
 .site-footer { border-top: 1px solid var(--line); padding: 20px 0; font-size: .85rem; color: var(--muted); }
+
+.hadith-text { font-size: 1.15rem; line-height: 2.1; margin: 0; white-space: pre-line; }
+.badge.referral { color: var(--gold-strong); } .badge.referral::before { content: "⚑"; }
+.badge.out_of_scope { color: var(--none); } .badge.out_of_scope::before { content: "↺"; }
+.message { border-color: #3a321c; }
+.message-text { margin: 0; font-size: 1.05rem; }

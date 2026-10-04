@@ -56,7 +56,18 @@ function renderLegend(diff, list) {
   }
 }
 
+function renderMessage(item) {
+  // Referral (levels C/D) and out-of-scope: fixed wording, never AI-generated.
+  const node = $("#message-tpl").content.firstElementChild.cloneNode(true);
+  const badge = $(".badge", node);
+  badge.textContent = item.status_label;
+  badge.classList.add(item.kind);
+  $(".message-text", node).textContent = item.explanation;
+  return node;
+}
+
 function renderItem(item) {
+  if (item.kind !== "quote") return renderMessage(item);
   const node = $("#item-tpl").content.firstElementChild.cloneNode(true);
   applyStrings(node);
   const badge = $(".badge", node);
@@ -68,12 +79,15 @@ function renderItem(item) {
 
   if (item.source) {
     $(".ref", node).textContent = item.source.ref;
-    $(".source-text", node).textContent = item.source.text;
+    const sourceText = $(".source-text", node);
+    sourceText.textContent = item.source.text;
+    if (item.source.type !== "quran") sourceText.classList.replace("quran", "hadith-text");
     const meta = $(".source-meta", node);
     meta.append(item.source.name + " — ");
     const link = el("a", "", S.label_source_link);
     link.href = item.source.url; link.target = "_blank"; link.rel = "noopener";
     meta.append(link);
+    if (item.source.attribution) meta.append(` • ${S.label_attribution}: ${item.source.attribution}`);
     if (item.source.grade) meta.append(` • ${S.label_grade}: ${item.source.grade} (${item.source.grade_source})`);
   } else {
     $(".box-source", node).hidden = true;
