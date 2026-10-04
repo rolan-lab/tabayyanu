@@ -45,3 +45,20 @@ def test_unknown_text_is_not_found_and_never_called_false(db):
     assert item["status"] == "not_found"
     for word in ("باطل", "موضوع", "مكذوب", "مزيف"):
         assert word not in item["explanation"]
+
+
+def test_prose_sentence_before_colon_does_not_spoil_exact(ayat):
+    _, _, _, emlaey = first_long_ayah(ayat)
+    with TestClient(app) as c:
+        r = c.post("/api/verify", json={"text": f"وصلتني هذه الرسالة اليوم من أحد الأصدقاء الكرام: {emlaey}"}).json()
+    assert [i["status"] for i in r["items"] if i["status"] != "not_found"] == ["exact"]
+
+
+def test_short_trailing_piece_keeps_whole_text_verdict(ayat):
+    """An altered tail split off by a full stop must not be dropped silently."""
+    _, _, _, emlaey = next(a for a in ayat if len(a[3].split()) > 12)
+    words = emlaey.split()
+    text = " ".join(words[:-2]) + ". " + words[-1] + " زيادة"
+    with TestClient(app) as c:
+        statuses = [i["status"] for i in c.post("/api/verify", json={"text": text}).json()["items"]]
+    assert "exact" not in statuses or len(statuses) > 1

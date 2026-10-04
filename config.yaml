@@ -59,6 +59,9 @@ levels:
     - "اختلف العلماء"
     - "خلاف العلماء"
     - "فتوي"
+    - "يتفقون"
+    - "اتفق العلماء"
+    - "اجماع"
   question_markers:        # anything else phrased as a question is out of scope
     - "هل"
     - "ما"

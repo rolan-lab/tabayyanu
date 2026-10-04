@@ -36,16 +36,19 @@ _FRAMING = [strict(p).split() for p in (
 _SENTENCE_BREAK = re.compile(r"[:؟?!.\n]+")
 
 
-def split_quotes(text: str) -> list[str]:
-    """Candidate quotations, deterministically (the LLM extractor, when enabled, replaces this):
-    bracketed quotations if there are any, otherwise sentence-like segments of the text."""
+def bracketed_quotes(text: str) -> list[str]:
+    """Quotations inside ﴿﴾ «» “” "" {} with enough words."""
     min_words = CONFIG["segments"]["min_words"]
     found = [next(g for g in m.groups() if g) for m in _QUOTED.finditer(text)]
-    found = [q for q in found if len(strict(q).split()) >= min_words]
-    if found:
-        return found
-    parts = [p for p in _SENTENCE_BREAK.split(text) if len(strict(p).split()) >= min_words]
-    return parts or [text]
+    return [q for q in found if len(strict(q).split()) >= min_words]
+
+
+def sentence_segments(text: str) -> tuple[list[str], bool]:
+    """Sentence-like pieces with enough words, and whether any short piece was left out."""
+    min_words = CONFIG["segments"]["min_words"]
+    pieces = [p for p in _SENTENCE_BREAK.split(text) if strict(p)]
+    kept = [p for p in pieces if len(strict(p).split()) >= min_words]
+    return kept, len(kept) < len(pieces)
 
 
 def clean_quote(text: str) -> str:
@@ -132,7 +135,7 @@ class Verifier:
         if not strict(text):
             return {"items": [], "notice": "empty_input"}
         level = content_level(text)
-        quotes = [self.verify_quote(q, level) for q in split_quotes(text)]
+        quotes = self.find_quotes(text, level)
         found = [q for q in quotes if q["status"] != "not_found"]
         items = []
         if level in ("C", "D"):
@@ -142,11 +145,29 @@ class Verifier:
             items = found
         elif is_question(text):
             items.append(self.message_item("out_of_scope", level))
-        elif len(quotes) == 1:
-            items = quotes
         else:
             items = [self.verify_quote(text, level)]  # report the text once, not per segment
         return {"items": items, "level": level}
+
+    def find_quotes(self, text: str, level: str) -> list[dict]:
+        """Deterministic quotation finding (the LLM extractor, when enabled, comes first):
+        bracketed quotations; else the whole text; else its sentence-like segments."""
+        bracketed = bracketed_quotes(text)
+        if bracketed:
+            return [self.verify_quote(q, level) for q in bracketed]
+        whole = self.verify_quote(text, level)
+        segments, dropped_short = sentence_segments(text)
+        if whole["status"] == "exact" or len(segments) < 2:
+            return [whole]
+        parts = [self.verify_quote(q, level) for q in segments]
+        if whole["status"] == "not_found":
+            return parts
+        # The whole text matched with differences. Trust the sentence split only if it gives an
+        # exact quotation and no short piece was dropped (a short piece could be part of an
+        # altered quote, and dropping it would hide the change).
+        if any(p["status"] == "exact" for p in parts) and not dropped_short:
+            return parts
+        return [whole]
 
     def message_item(self, kind: str, level: str) -> dict:
         return {"kind": kind, "quote": None, "level": level, "status": None, "status_label": STRINGS[f"kind_{kind}"],
