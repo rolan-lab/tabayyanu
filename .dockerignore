@@ -1,0 +1,9 @@
+.venv/
+.git/
+.claude/
+data/raw/
+data/db/
+app/static/fonts/
+**/__pycache__/
+.pytest_cache/
+.env
