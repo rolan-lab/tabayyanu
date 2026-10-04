@@ -31,3 +31,12 @@ Each entry: date and time (Asia/Riyadh), what changed, why. `CLAUDE.md` is kept 
 ## 2026-10-03 17:38 — KFGQPC Quran license accepted as documented
 - **What:** we use the KFGQPC Hafs files without an explicit license grant, display the text unchanged, and credit the Complex.
 - **Why:** the developer platform publishes the files for application developers, and the Complex's site policy excepts files it makes available for public use. Recorded in SOURCES.md; to be noted in LIMITATIONS.md. Approved by Rolan.
+
+## 2026-10-04 14:30 — API additions during Phases 1–3 (status labels unchanged)
+- **What:** each item has `kind` (`quote` | `referral` | `out_of_scope`); referral and out-of-scope items have `status: null` and carry the fixed Part 6 text. Quran items add `partial` and `also_in` (other places with the same exact text). Quotes too short to verify are `not_found` with `note_key: "too_short"` and their own note. Items add `diff_notes` (text description of each change) and `status_label`.
+- **Why:** referrals are not verification results, so they must not borrow a status; partial and repeated passages needed to be visible to stay honest about references. No status label or level definition changed.
+- **Flag:** level routing word lists in `config.yaml` (including agreement words «يتفقون», «إجماع» added before the eval cases were generated) are drafts for mentor review.
+
+## 2026-10-04 14:30 — Server access log disabled
+- **What:** the server runs with `--no-access-log`.
+- **Why:** default access lines record client IP addresses; rule 7 allows counts and latency only.

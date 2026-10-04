@@ -102,6 +102,13 @@ Dorar or Shamela.
 
 | Tool | Version | License | Use |
 |---|---|---|---|
-| Python | 3.13.7 | PSF | Scripts |
-| requests | 2.32.3 | Apache-2.0 | HTTP downloads |
-| SQLite (Python stdlib `sqlite3`) | bundled | Public domain | Local database |
+| Python | 3.11+ (dev on 3.13.7) | PSF | Everything |
+| requests | 2.32.3 | Apache-2.0 | Data downloads, LLM HTTP calls |
+| SQLite with FTS5 (Python stdlib `sqlite3`) | bundled (3.50.4 in dev) | Public domain | Database and full-text search (`bm25()`) |
+| FastAPI | 0.115.6 | MIT | Web API |
+| Uvicorn | 0.32.1 | BSD-3-Clause | Web server |
+| PyYAML | 6.0.2 | MIT | `config.yaml` |
+| pytest / httpx | 8.3.4 / 0.28.1 | MIT / BSD-3-Clause | Tests |
+| KFGQPC Hafs Uthmanic font (`kfgqpc_hafs_v30.ttf`) | from the same KFGQPC package as source 1 | as source 1 (UNCLEAR, accepted) | Displaying Quran text; extracted at build time, not committed |
+| IBM Plex Sans Arabic (Google Fonts) | — | SIL Open Font License 1.1 | UI font, loaded from fonts.googleapis.com |
+| LLM endpoint (optional) | set by `LLM_MODEL` | provider's terms | Quote extraction and short explanations only; off by default |
