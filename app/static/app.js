@@ -153,4 +153,12 @@ async function init() {
   } catch (err) { /* motto is decorative; the tool still works */ }
 }
 
-init();
+// Used by lessons: send a text to the verifier on the home page.
+function runCheck(text) {
+  location.hash = "#verify";
+  $("#input").value = text;
+  $("#input").dispatchEvent(new Event("input"));
+  verify();
+}
+
+window.appReady = init();

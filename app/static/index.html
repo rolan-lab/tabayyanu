@@ -32,7 +32,7 @@
     </div>
   </header>
 
-  <main>
+  <main id="home">
     <section class="hero wrap">
       <h1 data-s="tagline"></h1>
       <figure class="motto" id="motto" hidden>
@@ -48,7 +48,7 @@
       <div class="row">
         <button id="verify-btn" class="btn btn-gold" type="button" data-s="verify_button"></button>
         <button id="clear-btn" class="btn btn-ghost" type="button" data-s="clear_button"></button>
-        <span class="counter" id="counter" aria-live="polite"></span>
+        <span class="counter" id="counter" dir="ltr" aria-live="polite"></span>
       </div>
       <div id="status" class="status-line" role="status" aria-live="polite"></div>
       <div id="results" class="results" aria-live="polite"></div>
@@ -58,8 +58,11 @@
       <h2 id="paths-title" data-s="paths_title"></h2>
       <p class="muted" data-s="paths_subtitle"></p>
       <div id="paths-grid" class="paths-grid"></div>
+      <p class="muted small" data-s="progress_local_note"></p>
     </section>
   </main>
+
+  <main id="path-view" class="wrap path-view" hidden aria-live="polite"></main>
 
   <footer class="site-footer">
     <div class="wrap">
@@ -104,5 +107,6 @@
   </template>
 
   <script src="/static/app.js"></script>
+  <script src="/static/paths.js"></script>
 </body>
 </html>
