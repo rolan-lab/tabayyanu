@@ -8,7 +8,9 @@ Sources (see SOURCES.md):
 Raw downloads are cached; delete data/raw/<source>/ to re-download.
 The database is rebuilt from the raw files on every run.
 Text, grades and references are stored exactly as the sources give them.
-No normalization here (that is Phase 1): text_norm_placeholder stays NULL.
+text_norm holds app.normalize.strict() of the plain-spelling text (matching only;
+the raw text is what users see). The KFGQPC Uthmani font is extracted to
+app/static/fonts/ (gitignored) for displaying Quran text.
 """
 import hashlib
 import io
@@ -22,6 +24,9 @@ from pathlib import Path
 
 import requests
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from app.normalize import strict  # noqa: E402
+
 sys.stdout.reconfigure(encoding="utf-8")
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -32,6 +37,8 @@ QURAN_URL = "https://download.qurancomplex.gov.sa/resources_dev/kfgqpc_hafs_v30.
 QURAN_SHA256 = "227E6B1564D980F2BD09C2C35EBFB0330AC268C79A7C247CD1AB665BC635F245"
 QURAN_ZIP = RAW / "qurancomplex" / "kfgqpc_hafs_v30.zip"
 QURAN_JSON_IN_ZIP = "kfgqpc_hafs_v30-data/kfgqpc_hafs_v30.json"
+QURAN_FONT_IN_ZIP = "kfgqpc_hafs_v30-font/kfgqpc_hafs_v30.ttf"
+FONT_DEST = ROOT / "app" / "static" / "fonts" / "kfgqpc_hafs_v30.ttf"
 
 HEC_API = "https://hadeethenc.com/api/v1"
 HEC_DIR = RAW / "hadeethenc"
@@ -57,10 +64,11 @@ SCHEMA = """
 CREATE TABLE quran_ayat (
     id INTEGER PRIMARY KEY,          -- 'id' from the KFGQPC file (1..6236)
     surah INTEGER NOT NULL,          -- sura_no
+    surah_name_ar TEXT,              -- sura_name_ar, exactly as given
     ayah INTEGER NOT NULL,           -- aya_no
     text_raw TEXT NOT NULL,          -- aya_text_unicode, exactly as given
     text_emlaey TEXT,                -- aya_text_emlaey, exactly as given (plain spelling for search)
-    text_norm_placeholder TEXT       -- filled in Phase 1
+    text_norm TEXT NOT NULL          -- strict() of text_emlaey, for matching only
 );
 CREATE TABLE hadith (
     id TEXT PRIMARY KEY,             -- 'hadeethenc:<record id>:<collection>'
@@ -74,7 +82,8 @@ CREATE TABLE hadith (
     license_note TEXT NOT NULL,
     source_record_id TEXT NOT NULL,  -- id of the record at the source
     attribution TEXT,                -- e.g. 'متفق عليه', exactly as given
-    ref_raw TEXT                     -- the reference segment the number was taken from, as given
+    ref_raw TEXT,                    -- the reference segment the number was taken from, as given
+    text_norm TEXT NOT NULL          -- strict() of text_raw, for matching only
 );
 """
 
@@ -174,10 +183,15 @@ def build_db(quran_zip: bytes) -> None:
     con = sqlite3.connect(DB_PATH)
     con.executescript(SCHEMA)
 
-    ayat = json.loads(zipfile.ZipFile(io.BytesIO(quran_zip)).read(QURAN_JSON_IN_ZIP).decode("utf-8"))
+    archive = zipfile.ZipFile(io.BytesIO(quran_zip))
+    FONT_DEST.parent.mkdir(parents=True, exist_ok=True)
+    FONT_DEST.write_bytes(archive.read(QURAN_FONT_IN_ZIP))
+    ayat = json.loads(archive.read(QURAN_JSON_IN_ZIP).decode("utf-8"))
     con.executemany(
-        "INSERT INTO quran_ayat (id, surah, ayah, text_raw, text_emlaey) VALUES (?, ?, ?, ?, ?)",
-        [(a["id"], a["sura_no"], a["aya_no"], a["aya_text_unicode"], a["aya_text_emlaey"]) for a in ayat],
+        "INSERT INTO quran_ayat (id, surah, surah_name_ar, ayah, text_raw, text_emlaey, text_norm)"
+        " VALUES (?, ?, ?, ?, ?, ?, ?)",
+        [(a["id"], a["sura_no"], a["sura_name_ar"], a["aya_no"], a["aya_text_unicode"],
+          a["aya_text_emlaey"], strict(a["aya_text_emlaey"])) for a in ayat],
     )
     print(f"quran_ayat: inserted {len(ayat)} rows")
 
@@ -191,7 +205,7 @@ def build_db(quran_zip: bytes) -> None:
                 f"hadeethenc:{rec['id']}:{collection}", collection, None, number,
                 rec["hadeeth"], rec.get("grade"), "HadeethEnc.com",
                 HEC_PAGE_URL.format(id=rec["id"]), HEC_LICENSE,
-                rec["id"], rec.get("attribution"), line,
+                rec["id"], rec.get("attribution"), line, strict(rec["hadeeth"]),
             ))
     # A record citing the same collection twice would collide on id; keep the first
     # (numbered citations sort first) and report the rest.
@@ -201,13 +215,13 @@ def build_db(quran_zip: bytes) -> None:
             dupes.append(row)
         else:
             unique[row[0]] = row
-    con.executemany(f"INSERT INTO hadith VALUES ({', '.join('?' * 12)})", unique.values())
+    con.executemany(f"INSERT INTO hadith VALUES ({', '.join('?' * 13)})", unique.values())
     print(f"hadith: {len(records)} HadeethEnc records read, {len(unique)} Sahih citation rows inserted")
     if dupes:
         print(f"  NOTE: {len(dupes)} extra citations of an already-cited collection in the same record"
               f" were not inserted (first 10 shown):")
         for row in dupes[:10]:
-            print(f"    {row[0]} kept number {unique[row[0]][3]!r}; skipped: {row[-1]}")
+            print(f"    {row[0]} kept number {unique[row[0]][3]!r}; skipped: {row[11]}")
     con.commit()
     con.close()
     print(f"Built {DB_PATH}")

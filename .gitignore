@@ -19,3 +19,9 @@ venv/
 .idea/
 Thumbs.db
 .DS_Store
+
+# Extracted by scripts/ingest.py from the KFGQPC package (not redistributed)
+app/static/fonts/
+
+# Local tool config
+.claude/
