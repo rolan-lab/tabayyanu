@@ -1,0 +1,8 @@
+{
+  "_meta": {
+    "about": "Learning paths (path -> module -> lesson). Content is supplied by the team, a mentor or approved sources only; it is never generated. See docs/PATHS_FORMAT.md.",
+    "quran_and_hadith": "Quote the Quran and hadith only through 'quran' and 'hadith' blocks (references). The app shows the official text from the database.",
+    "review": "Every path needs review by the Sharia mentor before its status is set to 'published'."
+  },
+  "paths": []
+}

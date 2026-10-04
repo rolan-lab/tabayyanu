@@ -14,6 +14,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
+from app import paths
 from app.verify import Verifier
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -40,6 +41,9 @@ async def lifespan(app: FastAPI):
         "SELECT surah_name_ar, text_raw FROM quran_ayat WHERE surah = 49 AND ayah = 6").fetchone()
     state["motto"] = {"text": text, "surah_name": surah_name, "surah": 49, "ayah": 6}
     con.close()
+    include_drafts = os.environ.get("SHOW_DRAFT_PATHS") == "1"  # team preview only
+    paths_file = Path(os.environ.get("PATHS_FILE", paths.PATHS_FILE))
+    state["paths"] = paths.resolve(paths.load(paths_file), DB_PATH, state["verifier"], include_drafts)
     log.info("loaded index in %.2fs: %s", time.monotonic() - started, state["counts"])
     yield
 
@@ -73,6 +77,11 @@ def health():
 @app.get("/api/meta")
 def meta():
     return {"motto": state["motto"], "max_chars": MAX_CHARS, **state["counts"]}
+
+
+@app.get("/api/paths")
+def learning_paths():
+    return {"paths": state["paths"]}
 
 
 @app.get("/")
