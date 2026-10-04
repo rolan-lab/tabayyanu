@@ -30,18 +30,26 @@ function setStatus(text, kind = "") {
   box.appendChild(document.createTextNode(text));
 }
 
+function diffWord(cls, op, text) {
+  // The change type is also given in words (title and aria-label), not only by color.
+  const span = el("span", "w " + cls, text);
+  span.title = S.legend[op];
+  span.setAttribute("aria-label", `${S.legend[op]}: ${text}`);
+  return span;
+}
+
 function renderDiff(diff, container) {
   for (const d of diff) {
     if (d.op === "equal") { container.append(d.quote, " "); continue; }
     if (d.op === "replace") {
-      container.append(el("span", "w replace-q", d.quote), " ");
-      container.append(el("span", "w replace-s", d.source), " ");
+      container.append(diffWord("replace-q", "replace", d.quote), " ");
+      container.append(diffWord("replace-s", "replace", d.source), " ");
     } else if (d.op === "insert") {
-      container.append(el("span", "w insert", d.quote), " ");
+      container.append(diffWord("insert", "insert", d.quote), " ");
     } else if (d.op === "delete") {
-      container.append(el("span", "w delete", d.source), " ");
+      container.append(diffWord("delete", "delete", d.source), " ");
     } else if (d.op === "spelling") {
-      container.append(el("span", "w spelling", d.quote), " ");
+      container.append(diffWord("spelling", "spelling", d.quote), " ");
     }
   }
 }

@@ -31,6 +31,7 @@ function progressBar(done, total) {
   bar.setAttribute("aria-valuemin", "0");
   bar.setAttribute("aria-valuemax", String(total));
   bar.setAttribute("aria-valuenow", String(done));
+  bar.setAttribute("aria-label", fmt(S.path_progress, { done, total }));
   const fill = el("span");
   fill.style.width = total ? `${(100 * done) / total}%` : "0";
   bar.append(fill);
