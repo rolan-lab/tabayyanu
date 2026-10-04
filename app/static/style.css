@@ -165,3 +165,13 @@ textarea:focus { border-color: var(--gold); }
 .question button { text-align: start; }
 .question .feedback { min-height: 1.6em; margin-top: 6px; }
 .lesson-nav { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 24px; }
+
+.report { margin-top: 12px; font-size: .9rem; }
+.report summary { cursor: pointer; color: var(--muted); }
+.report summary:hover { color: var(--gold-strong); }
+.report-form { display: grid; gap: 8px; margin-top: 8px; }
+.report-form textarea { min-height: 60px; }
+.consent { display: flex; gap: 8px; align-items: flex-start; }
+.consent input { margin-top: .45em; width: 18px; height: 18px; accent-color: var(--gold); }
+.report-status { min-height: 1.4em; margin: 0; color: var(--gold-strong); }
+.feedback.ok { color: var(--ok); }

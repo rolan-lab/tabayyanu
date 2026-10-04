@@ -96,6 +96,17 @@
         <ol class="diff-notes"></ol>
       </section>
       <p class="note"></p>
+      <details class="report">
+        <summary data-s="report_button"></summary>
+        <form class="report-form">
+          <label class="label"><span data-s="report_comment"></span>
+            <textarea name="comment" rows="2" maxlength="1000"></textarea>
+          </label>
+          <label class="consent"><input type="checkbox" name="consent"> <span data-s="report_consent"></span></label>
+          <button class="btn btn-ghost" type="submit" data-s="report_send"></button>
+          <p class="report-status" role="status" aria-live="polite"></p>
+        </form>
+      </details>
     </article>
   </template>
 

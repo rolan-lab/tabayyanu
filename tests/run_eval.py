@@ -14,6 +14,7 @@ Critical errors (target zero):
   called_false    a text called false / fabricated
 """
 import argparse
+import os
 import json
 import sqlite3
 import statistics
@@ -25,10 +26,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
+from app.main import load_env_file  # noqa: E402  (reads .env so LLM settings apply)
 from app.verify import STRINGS, Verifier  # noqa: E402
 
 DB = ROOT / "data" / "db" / "tabayyanu.sqlite"
 CASES = ROOT / "tests" / "cases.jsonl"
+LLM_INFO = {"llm": None}
 FALSE_WORDS = ("باطل", "موضوع", "مكذوب", "مزيف", "مختلق", "لا أصل له")
 RULING_WORDS = ("يجوز لك", "لا يجوز", "حرام عليك", "حلال لك", "يجب عليك", "فتواي")
 
@@ -126,6 +129,7 @@ def run(split: str, runs: int):
 
     started = time.monotonic()
     verifier = Verifier(str(DB))
+    LLM_INFO["llm"] = verifier.llm
     load_s = time.monotonic() - started
     checker = Checker(verifier)
 
@@ -176,7 +180,14 @@ def table(split, runs, selected, pending, per_case, latencies, load_s) -> str:
     if latencies:
         p95 = sorted(latencies)[max(0, int(len(latencies) * 0.95) - 1)]
         lines += ["", f"Latency per request: median {statistics.median(latencies):.0f} ms, p95 {p95:.0f} ms "
-                      f"(index load {load_s:.1f} s, once at startup). LLM tokens: 0 (explanations are templates)."]
+                      f"(index load {load_s:.1f} s, once at startup)."]
+    usage = getattr(LLM_INFO["llm"], "usage", None)
+    if usage:
+        lines.append(f"LLM `{LLM_INFO['llm'].name}` model `{LLM_INFO['llm'].model}`: {usage['calls']} calls, "
+                     f"{usage['prompt_tokens']} prompt + {usage['completion_tokens']} completion tokens, "
+                     f"{usage['failures']} failed and {usage['rejected']} rejected outputs (template used).")
+    else:
+        lines.append("LLM: none (deterministic extraction, template explanations, 0 tokens).")
     failures = [r for r in per_case if not r["ok"] or r["critical"]]
     if failures:
         lines += ["", "Failures and critical errors:", ""]

@@ -101,7 +101,29 @@ function renderItem(item) {
     item.diff_notes.forEach(n => notes.append(el("li", "", n)));
   }
   $(".note", node).textContent = item.note || "";
+  $(".report-form", node).addEventListener("submit", e => sendReport(e, item));
   return node;
+}
+
+// Error report: sent only when the user ticks the consent box (nothing is stored otherwise).
+async function sendReport(event, item) {
+  event.preventDefault();
+  const form = event.target;
+  const status = $(".report-status", form);
+  if (!form.consent.checked) { status.textContent = S.report_need_consent; return; }
+  try {
+    const res = await fetch("/api/report", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ consent: true, quote: item.quote || "", status: item.status,
+                             ref: item.source ? item.source.ref : null, comment: form.comment.value }),
+    });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    status.textContent = S.report_thanks;
+    form.querySelector("button").disabled = true;
+  } catch (err) {
+    status.textContent = S.report_failed;
+  }
 }
 
 async function verify() {

@@ -2,6 +2,7 @@
 
 Stateless. No user text is stored or logged: logs hold counts and latency only.
 """
+import json
 import logging
 import os
 import sqlite3
@@ -18,6 +19,22 @@ from app import paths
 from app.verify import Verifier
 
 ROOT = Path(__file__).resolve().parent.parent
+
+
+def load_env_file(path: Path) -> None:
+    """Minimal .env reader (KEY=VALUE lines); real environment variables win."""
+    if not path.exists():
+        return
+    for line in path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if line and not line.startswith("#") and "=" in line:
+            key, value = line.split("=", 1)
+            os.environ.setdefault(key.strip(), value.strip())
+
+
+load_env_file(ROOT / ".env")
+
+
 DB_PATH = os.environ.get("DB_PATH", str(ROOT / "data" / "db" / "tabayyanu.sqlite"))
 STATIC = ROOT / "app" / "static"
 MAX_CHARS = 5000
@@ -44,7 +61,8 @@ async def lifespan(app: FastAPI):
     include_drafts = os.environ.get("SHOW_DRAFT_PATHS") == "1"  # team preview only
     paths_file = Path(os.environ.get("PATHS_FILE", paths.PATHS_FILE))
     state["paths"] = paths.resolve(paths.load(paths_file), DB_PATH, state["verifier"], include_drafts)
-    log.info("loaded index in %.2fs: %s", time.monotonic() - started, state["counts"])
+    log.info("loaded index in %.2fs: %s, llm=%s", time.monotonic() - started, state["counts"],
+             state["verifier"].llm.name)
     yield
 
 
@@ -69,9 +87,34 @@ def verify(req: VerifyRequest):
     return result
 
 
+REPORTS = Path(os.environ.get("REPORTS_PATH", str(ROOT / "data" / "reports" / "reports.jsonl")))
+
+
+class ReportRequest(BaseModel):
+    consent: bool
+    quote: str = Field(..., max_length=MAX_CHARS)
+    status: str | None = Field(None, max_length=40)
+    ref: str | None = Field(None, max_length=300)
+    comment: str = Field("", max_length=1000)
+
+
+@app.post("/api/report")
+def report(req: ReportRequest):
+    """Store an error report only with explicit consent (rule 7). Nothing else is stored."""
+    if req.consent is not True:
+        raise HTTPException(status_code=400, detail="consent_required")
+    REPORTS.parent.mkdir(parents=True, exist_ok=True)
+    row = {"time": time.strftime("%Y-%m-%dT%H:%M:%S%z"), **req.model_dump()}
+    with REPORTS.open("a", encoding="utf-8") as f:
+        f.write(json.dumps(row, ensure_ascii=False) + "\n")
+    log.info("report stored (with consent)")
+    return {"ok": True}
+
+
 @app.get("/health")
 def health():
-    return {"status": "ok", **state.get("counts", {})}
+    llm = state["verifier"].llm.name if "verifier" in state else None
+    return {"status": "ok", "llm": llm, **state.get("counts", {})}
 
 
 @app.get("/api/meta")

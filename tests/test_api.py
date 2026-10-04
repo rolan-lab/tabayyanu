@@ -62,3 +62,13 @@ def test_short_trailing_piece_keeps_whole_text_verdict(ayat):
     with TestClient(app) as c:
         statuses = [i["status"] for i in c.post("/api/verify", json={"text": text}).json()["items"]]
     assert "exact" not in statuses or len(statuses) > 1
+
+
+def test_report_requires_consent(tmp_path, monkeypatch):
+    import app.main as main
+    monkeypatch.setattr(main, "REPORTS", tmp_path / "reports.jsonl")
+    with TestClient(app) as c:
+        assert c.post("/api/report", json={"consent": False, "quote": "نص"}).status_code == 400
+        assert not (tmp_path / "reports.jsonl").exists()
+        assert c.post("/api/report", json={"consent": True, "quote": "نص", "comment": "خطأ"}).json() == {"ok": True}
+    assert (tmp_path / "reports.jsonl").read_text(encoding="utf-8").count("\n") == 1

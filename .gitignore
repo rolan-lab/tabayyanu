@@ -25,3 +25,6 @@ app/static/fonts/
 
 # Local tool config
 .claude/
+
+# Consented error reports (never committed)
+data/reports/
