@@ -65,5 +65,11 @@
   "footer_sources": "المصادر: مجمع الملك فهد لطباعة المصحف الشريف، موسوعة الأحاديث النبوية (HadeethEnc.com).",
   "prophet_note": "ﷺ",
   "partial_note": "اقتباس جزئي: النص المدخل جزء من الآية، والآية كاملة معروضة في خانة «نص من المصدر».",
-  "also_in": "ورد النص نفسه أيضًا في: {refs}."
+  "also_in": "ورد النص نفسه أيضًا في: {refs}.",
+  "hadith_source_name": "موسوعة الأحاديث النبوية (HadeethEnc.com)",
+  "hadith_citation": "{collection} (رقم {number})",
+  "hadith_citation_no_number": "{collection} (الرقم غير مذكور في المصدر)",
+  "label_attribution": "التخريج",
+  "kind_referral": "إحالة إلى مختص",
+  "kind_out_of_scope": "خارج النطاق"
 }
