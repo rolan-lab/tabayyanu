@@ -1,0 +1,16 @@
+# Thresholds and switches. Tune thresholds only on the dev split of tests/cases.jsonl.
+
+normalize:
+  # Folding these letters raises recall but can merge different words
+  # (e.g. على / علي), so they only ever help find a candidate; a quote that
+  # differs from the source only by these letters is lexical_diff, never exact.
+  fold_ya: true            # ى -> ي
+  fold_ta_marbuta: true    # ة -> ه
+  fold_hamza_carriers: true  # ؤ -> و, ئ -> ي, ء removed
+
+quran:
+  min_words: 3             # shorter quotes are not verified (too ambiguous)
+  min_similarity: 0.6      # matched words / longer side, for lexical_diff
+  min_matched_words: 3     # at least this many words must match in order
+  candidates: 24           # candidate start offsets checked per quote (repeated passages need several)
+  ngram: 2                 # n-gram size used to find candidate offsets
