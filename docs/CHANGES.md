@@ -40,3 +40,8 @@ Each entry: date and time (Asia/Riyadh), what changed, why. `CLAUDE.md` is kept 
 ## 2026-10-04 14:30 — Server access log disabled
 - **What:** the server runs with `--no-access-log`.
 - **Why:** default access lines record client IP addresses; rule 7 allows counts and latency only.
+
+## 2026-10-04 23:10 — Official Quran file bundled in the repository
+- **What:** `data/vendor/kfgqpc_hafs_v30.zip`, the unmodified KFGQPC file (SHA-256 `227E6B15…F245`, as published). `scripts/ingest.py` tries the official URL first and falls back to this copy; either copy must match the published SHA-256 or the build stops (tested, including a one-byte tamper test).
+- **Why:** Render's build servers (Frankfurt) cannot connect to `download.qurancomplex.gov.sa` (connection timeout, 2026-10-04), so the deployment could not build. Not a mirror or another dataset: the same official file, verified by hash.
+- **Flag:** this redistributes the file through our public GitHub repository, beyond using and displaying it. The KFGQPC license is UNCLEAR (SOURCES.md). Decided by Rolan.

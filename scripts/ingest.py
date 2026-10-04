@@ -37,6 +37,10 @@ DB_PATH = ROOT / "data" / "db" / "tabayyanu.sqlite"
 QURAN_URL = "https://download.qurancomplex.gov.sa/resources_dev/kfgqpc_hafs_v30.zip"
 QURAN_SHA256 = "227E6B1564D980F2BD09C2C35EBFB0330AC268C79A7C247CD1AB665BC635F245"
 QURAN_ZIP = RAW / "qurancomplex" / "kfgqpc_hafs_v30.zip"
+# The same official file, bundled in the repo for hosts that cannot reach the Complex's
+# server (it timed out from Render, Frankfurt, 2026-10-04). Accepted only if its SHA-256
+# equals the value published by the Complex. See data/vendor/README.md.
+QURAN_ZIP_BUNDLED = ROOT / "data" / "vendor" / "kfgqpc_hafs_v30.zip"
 QURAN_JSON_IN_ZIP = "kfgqpc_hafs_v30-data/kfgqpc_hafs_v30.json"
 QURAN_FONT_IN_ZIP = "kfgqpc_hafs_v30-font/kfgqpc_hafs_v30.ttf"
 FONT_DEST = ROOT / "app" / "static" / "fonts" / "kfgqpc_hafs_v30.ttf"
@@ -93,11 +97,18 @@ CREATE VIRTUAL TABLE hadith_fts USING fts5(source_record_id UNINDEXED, text);
 
 def fetch_quran_zip() -> bytes:
     if not QURAN_ZIP.exists():
-        print(f"GET {QURAN_URL}")
-        resp = requests.get(QURAN_URL, timeout=120)
-        resp.raise_for_status()
+        try:
+            print(f"GET {QURAN_URL}")
+            resp = requests.get(QURAN_URL, timeout=(15, 120))
+            resp.raise_for_status()
+            content = resp.content
+        except requests.RequestException as exc:
+            if not QURAN_ZIP_BUNDLED.exists():
+                raise
+            print(f"  official server not reachable ({type(exc).__name__}); using the bundled official file")
+            content = QURAN_ZIP_BUNDLED.read_bytes()
         QURAN_ZIP.parent.mkdir(parents=True, exist_ok=True)
-        QURAN_ZIP.write_bytes(resp.content)
+        QURAN_ZIP.write_bytes(content)
     data = QURAN_ZIP.read_bytes()
     sha = hashlib.sha256(data).hexdigest().upper()
     if sha != QURAN_SHA256:
