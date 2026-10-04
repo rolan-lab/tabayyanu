@@ -14,3 +14,60 @@ quran:
   min_matched_words: 3     # at least this many words must match in order
   candidates: 24           # candidate start offsets checked per quote (repeated passages need several)
   ngram: 2                 # n-gram size used to find candidate offsets
+
+hadith:
+  min_words: 4             # shorter quotes are not verified
+  fts_candidates: 30       # records fetched by BM25 before alignment
+  min_similarity: 0.75     # matched words / longer side, for lexical_diff
+  min_matched_words: 4
+  near_min_containment: 0.5  # share of the quote's word pairs found in the record, for near_match
+  near_min_shared_pairs: 3
+  # Phrases ignored when comparing (written in many ways; not part of the wording being checked).
+  ignore_phrases:
+    - "صلى الله عليه وسلم"
+    - "رضي الله عنه"
+    - "رضي الله عنها"
+    - "رضي الله عنهما"
+    - "رضي الله عنهم"
+
+# Content-level routing (organizers' A-D). Plain word lists, applied to the
+# strict-normalized input. DRAFT: needs review by the Sharia mentor.
+levels:
+  personal_markers:        # D: personal case or request for a fatwa
+    - "هل يجوز لي"
+    - "هل يجوز ان افعل"
+    - "هل علي"
+    - "هل يلزمني"
+    - "ماذا افعل"
+    - "زوجي"
+    - "زوجتي"
+    - "طلقني"
+    - "طلقت"
+    - "حلفت"
+    - "نذرت"
+    - "صلاتي"
+    - "صيامي"
+    - "مالي"
+    - "حالتي"
+  ruling_markers:          # C: ruling questions, disputed matters
+    - "ما حكم"
+    - "هل يجوز"
+    - "حلال ام حرام"
+    - "هل هو حرام"
+    - "هل هو حلال"
+    - "الراجح"
+    - "اختلف العلماء"
+    - "خلاف العلماء"
+    - "فتوي"
+  question_markers:        # anything else phrased as a question is out of scope
+    - "هل"
+    - "ما"
+    - "ماذا"
+    - "لماذا"
+    - "كيف"
+    - "متي"
+    - "اين"
+    - "من هو"
+
+segments:
+  min_words: 3             # segments shorter than this are not checked

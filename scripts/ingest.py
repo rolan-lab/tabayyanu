@@ -25,7 +25,8 @@ from pathlib import Path
 import requests
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from app.normalize import strict  # noqa: E402
+from app.normalize import folded, strict  # noqa: E402
+import yaml  # noqa: E402
 
 sys.stdout.reconfigure(encoding="utf-8")
 
@@ -85,6 +86,8 @@ CREATE TABLE hadith (
     ref_raw TEXT,                    -- the reference segment the number was taken from, as given
     text_norm TEXT NOT NULL          -- strict() of text_raw, for matching only
 );
+-- Full-text index over unique HadeethEnc records (folded text), ranked with bm25().
+CREATE VIRTUAL TABLE hadith_fts USING fts5(source_record_id UNINDEXED, text);
 """
 
 
@@ -216,6 +219,11 @@ def build_db(quran_zip: bytes) -> None:
         else:
             unique[row[0]] = row
     con.executemany(f"INSERT INTO hadith VALUES ({', '.join('?' * 13)})", unique.values())
+    flags = yaml.safe_load((ROOT / "config.yaml").read_text(encoding="utf-8"))["normalize"]
+    texts = {row[9]: row[4] for row in unique.values()}  # source_record_id -> text_raw
+    con.executemany("INSERT INTO hadith_fts (source_record_id, text) VALUES (?, ?)",
+                    [(rid, folded(text, **flags)) for rid, text in texts.items()])
+    print(f"hadith_fts: indexed {len(texts)} unique records")
     print(f"hadith: {len(records)} HadeethEnc records read, {len(unique)} Sahih citation rows inserted")
     if dupes:
         print(f"  NOTE: {len(dupes)} extra citations of an already-cited collection in the same record"
