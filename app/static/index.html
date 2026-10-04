@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>تبيّنوا — التحقق من الآيات والأحاديث</title>
+  <meta name="description" content="أداة تتحقق من نصوص الآيات والأحاديث بمطابقتها مع المصادر المعتمدة.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <a class="skip" href="#verify">تخطَّ إلى أداة التحقق</a>
+
+  <div class="notice-bar" role="note">
+    <span data-s="disclaimer"></span>
+    <span class="dot" aria-hidden="true">•</span>
+    <span data-s="privacy"></span>
+  </div>
+
+  <header class="site-header">
+    <div class="wrap header-row">
+      <a class="brand" href="/" aria-label="تبيّنوا">
+        <span class="brand-mark" aria-hidden="true">✦</span>
+        <span data-s="app_name"></span>
+      </a>
+      <nav aria-label="القائمة الرئيسية">
+        <a href="#verify" data-s="nav_verify"></a>
+        <a href="#paths" data-s="nav_paths"></a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero wrap">
+      <h1 data-s="tagline"></h1>
+      <figure class="motto" id="motto" hidden>
+        <blockquote class="quran" id="motto-text"></blockquote>
+        <figcaption id="motto-ref"></figcaption>
+      </figure>
+    </section>
+
+    <section id="verify" class="wrap card verify-card" aria-labelledby="verify-title">
+      <h2 id="verify-title" data-s="nav_verify"></h2>
+      <label for="input" class="label" data-s="input_label"></label>
+      <textarea id="input" rows="6" maxlength="5000" data-s-placeholder="input_placeholder"></textarea>
+      <div class="row">
+        <button id="verify-btn" class="btn btn-gold" type="button" data-s="verify_button"></button>
+        <button id="clear-btn" class="btn btn-ghost" type="button" data-s="clear_button"></button>
+        <span class="counter" id="counter" aria-live="polite"></span>
+      </div>
+      <div id="status" class="status-line" role="status" aria-live="polite"></div>
+      <div id="results" class="results" aria-live="polite"></div>
+    </section>
+
+    <section id="paths" class="wrap paths" aria-labelledby="paths-title">
+      <h2 id="paths-title" data-s="paths_title"></h2>
+      <p class="muted" data-s="paths_subtitle"></p>
+      <div id="paths-grid" class="paths-grid"></div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p data-s="footer_sources"></p>
+      <p class="muted"><span data-s="disclaimer"></span> <span data-s="privacy"></span></p>
+    </div>
+  </footer>
+
+  <template id="item-tpl">
+    <article class="item card">
+      <header class="item-head">
+        <span class="badge"></span>
+        <span class="ref"></span>
+      </header>
+      <p class="quote-line"><span class="label" data-s="label_quote"></span> <span class="quote"></span></p>
+      <div class="boxes">
+        <section class="box box-source">
+          <h3 data-s="box_source"></h3>
+          <blockquote class="quran source-text"></blockquote>
+          <p class="source-meta muted"></p>
+        </section>
+        <section class="box box-ai">
+          <h3><span data-s="box_ai"></span> <span class="origin"></span></h3>
+          <p class="explanation"></p>
+        </section>
+      </div>
+      <section class="diff-wrap" hidden>
+        <h3 data-s="label_diff"></h3>
+        <p class="diff" dir="rtl"></p>
+        <ul class="legend"></ul>
+        <ol class="diff-notes"></ol>
+      </section>
+      <p class="note"></p>
+    </article>
+  </template>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
