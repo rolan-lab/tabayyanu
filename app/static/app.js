@@ -250,7 +250,12 @@ async function verify() {
     const data = await res.json();
     setStatus("");
     if (data.notice) setStatus(S[data.notice] || "", "error");
-    data.items.forEach(item => results.append(renderItem(item)));
+    data.items.forEach((item, i) => {
+      const node = renderItem(item);
+      node.style.setProperty("--delay", `${i * 80}ms`);  // cards ease in one after another
+      node.classList.add("enter");
+      results.append(node);
+    });
     if (data.items.length) results.firstElementChild.scrollIntoView({ behavior: "smooth", block: "nearest" });
   } catch (err) {
     setStatus(S.error_generic, "error");

@@ -206,12 +206,27 @@ function renderLesson(path, module, lesson, view) {
   view.append(nav);
 }
 
+// Page changes fade and slide in: the browser's View Transitions API where available,
+// otherwise a CSS entrance animation. Both are off when the user prefers reduced motion.
 function route() {
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (document.startViewTransition && !reduce) document.startViewTransition(renderRoute);
+  else renderRoute();
+}
+
+function animateIn(el) {
+  el.classList.remove("enter");
+  void el.offsetWidth;  // restart the animation
+  el.classList.add("enter");
+}
+
+function renderRoute() {
   const view = $("#path-view");
   const parts = location.hash.replace(/^#\/?/, "").split("/").map(decodeURIComponent);
   const isPathRoute = parts[0] === "path" || parts[0] === "lesson";
   $("#home").hidden = isPathRoute;
   view.hidden = !isPathRoute;
+  animateIn(isPathRoute ? view : $("#home"));
   if (!isPathRoute) { renderGrid(); return; }
   view.textContent = "";
   const path = PATHS.find(p => p.id === parts[1]);
@@ -220,7 +235,7 @@ function route() {
   if (parts[0] === "path" && path) renderPath(path, view);
   else if (parts[0] === "lesson" && lesson) renderLesson(path, module, lesson, view);
   else view.append(el("p", "", S.not_found_page), crumbs([S.paths_home, "#"]));
-  window.scrollTo(0, 0);
+  window.scrollTo({ top: 0, behavior: "instant" });
 }
 
 (async () => {

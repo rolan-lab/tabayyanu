@@ -203,3 +203,34 @@ html[dir="ltr"] body { font-family: system-ui, "Segoe UI", Arial, var(--font-ui)
 .box-cited { border: 1px dashed var(--warn); background: var(--surface); }
 .cited-text { font-size: 1.1rem; margin: 0 0 6px; }
 .block { margin: 10px 0; }
+
+/* ---- Motion: soft page changes, easing cards, a slowly drifting gold glow ---- */
+body { position: relative; }
+body::before, body::after {
+  content: ""; position: fixed; z-index: -1; pointer-events: none;
+  width: 60vmax; height: 60vmax; border-radius: 50%; filter: blur(80px); opacity: .22;
+}
+body::before { background: radial-gradient(circle, #b8892c 0%, transparent 65%); top: -20vmax; inset-inline-end: -15vmax;
+  animation: drift-a 26s ease-in-out infinite alternate; }
+body::after { background: radial-gradient(circle, #6b4f1d 0%, transparent 65%); bottom: -25vmax; inset-inline-start: -20vmax;
+  animation: drift-b 32s ease-in-out infinite alternate; }
+@keyframes drift-a { from { transform: translate(0, 0) scale(1); } to { transform: translate(-12vmax, 10vmax) scale(1.15); } }
+@keyframes drift-b { from { transform: translate(0, 0) scale(1.1); } to { transform: translate(10vmax, -8vmax) scale(.95); } }
+
+.enter { animation: rise-in .45s cubic-bezier(.2, .7, .2, 1) both; animation-delay: var(--delay, 0ms); }
+@keyframes rise-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+::view-transition-old(root) { animation: fade-out .22s ease both; }
+::view-transition-new(root) { animation: rise-in .38s cubic-bezier(.2, .7, .2, 1) both; }
+@keyframes fade-out { to { opacity: 0; } }
+
+.card, .btn, .chip-btn, .path-card, .lesson-list a, nav a { transition: border-color .25s, background-color .25s, color .25s, transform .25s, box-shadow .25s; }
+.path-card:hover, .lesson-list a:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0, 0, 0, .35); }
+.btn-gold:hover { box-shadow: 0 0 0 4px rgba(217, 178, 95, .18); }
+details > *:not(summary) { animation: rise-in .3s ease both; }
+
+@media (prefers-reduced-motion: reduce) {
+  body::before, body::after { animation: none; }
+  .enter, details > *:not(summary), ::view-transition-new(root), ::view-transition-old(root) { animation: none; }
+  .path-card:hover, .lesson-list a:hover { transform: none; }
+}
