@@ -16,6 +16,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from app import paths
+from app.guide import Guide
 from app.verify import Verifier
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -61,6 +62,7 @@ async def lifespan(app: FastAPI):
     include_drafts = os.environ.get("SHOW_DRAFT_PATHS") == "1"  # team preview only
     paths_file = Path(os.environ.get("PATHS_FILE", paths.PATHS_FILE))
     state["paths"] = paths.resolve(paths.load(paths_file), DB_PATH, state["verifier"], include_drafts)
+    state["guide"] = Guide(state["paths"], state["verifier"])
     log.info("loaded index in %.2fs: %s, llm=%s", time.monotonic() - started, state["counts"],
              state["verifier"].llm.name)
     yield
@@ -121,6 +123,21 @@ def health():
 @app.get("/api/meta")
 def meta():
     return {"motto": state["motto"], "max_chars": MAX_CHARS, **state["counts"]}
+
+
+class GuideRequest(BaseModel):
+    question: str = Field(..., max_length=500)
+    lang: str = Field("ar", pattern="^(ar|en)$")
+
+
+@app.post("/api/guide")
+def guide(req: GuideRequest):
+    """Learning-path guide: links to lessons only (no generated answer). The question is not stored."""
+    started = time.monotonic()
+    result = state["guide"].ask(req.question, req.lang)
+    log.info("guide kind=%s lessons=%d picked_by=%s ms=%.0f", result["kind"], len(result["lessons"]),
+             result.get("picked_by"), (time.monotonic() - started) * 1000)
+    return result
 
 
 @app.get("/api/paths")

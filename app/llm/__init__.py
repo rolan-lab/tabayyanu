@@ -28,6 +28,12 @@ class NoLLM:
     def explain(self, record: dict, verdict: str, diff: list, quote: str, lang: str = "ar"):
         return None
 
+    def search_keywords(self, question: str):
+        return None
+
+    def pick_lessons(self, question: str, candidates: list):
+        return None
+
 
 def validate_quotes(quotes, text: str) -> list[str] | None:
     """Keep only quotations that are literal substrings of the input."""

@@ -6,7 +6,8 @@ import time
 import requests
 
 from app.llm import validate_explanation, validate_quotes
-from app.llm.prompts import EXPLAIN_SCHEMA, EXPLAIN_SYSTEM, EXTRACT_SCHEMA, EXTRACT_SYSTEM, wrap_user_text
+from app.llm.prompts import (EXPLAIN_SCHEMA, EXPLAIN_SYSTEM, EXTRACT_SCHEMA, EXTRACT_SYSTEM, KEYWORDS_SCHEMA,
+                             KEYWORDS_SYSTEM, PICK_SYSTEM, pick_schema, wrap_user_text)
 
 log = logging.getLogger("tabayyanu.llm")
 TIMEOUT_S = 15
@@ -71,6 +72,22 @@ class OpenAICompat:
         language = "English" if lang == "en" else "Arabic"
         out = self._call(EXPLAIN_SYSTEM.replace("{language}", language), user, EXPLAIN_SCHEMA)
         return self._count(validate_explanation(out.get("explanation"), verdict) if isinstance(out, dict) else None, out)
+
+    def search_keywords(self, question: str) -> list[str] | None:
+        """Guide: Arabic search keywords for a question (validated by the caller: Arabic words only)."""
+        out = self._call(KEYWORDS_SYSTEM, wrap_user_text(question), KEYWORDS_SCHEMA)
+        words = out.get("keywords") if isinstance(out, dict) else None
+        valid = [w for w in words if isinstance(w, str)][:6] if isinstance(words, list) else None
+        return self._count(valid or None, out)
+
+    def pick_lessons(self, question: str, candidates: list) -> list[str] | None:
+        """Guide: up to 3 lesson ids chosen among the search results (ids checked again here)."""
+        ids = [c[0] for c in candidates]
+        listing = "\n".join(f"{cid}: {title} ({module})" for cid, title, module in candidates)
+        out = self._call(PICK_SYSTEM, f"<lessons>\n{listing}\n</lessons>\n{wrap_user_text(question)}", pick_schema(ids))
+        picked = out.get("ids") if isinstance(out, dict) else None
+        valid = [i for i in dict.fromkeys(picked) if i in ids][:3] if isinstance(picked, list) else None
+        return self._count(valid or None, out)
 
     def _count(self, value, raw):
         """Count outputs that arrived but failed validation (the caller then falls back)."""
