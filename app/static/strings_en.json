@@ -117,5 +117,7 @@
     "non_muslims": "For non-Muslims",
     "both": "For everyone"
   },
-  "audience_label": "Audience"
+  "audience_label": "Audience",
+  "cited_not_indexed": "Not verified in our indexed sources. You can check it or consult its source.",
+  "cited_quote": "A quotation given by the lesson's author; you can check it."
 }

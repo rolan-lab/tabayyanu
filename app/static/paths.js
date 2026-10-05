@@ -119,7 +119,20 @@ function renderPath(path, view) {
 function renderBlock(block) {
   const wrap = el("div", "block");
   if (block.type === "text") {
-    wrap.append(el("p", "", block.body));
+    wrap.append(el("p", "lesson-text", block.body));
+  } else if (block.type === "heading") {
+    wrap.append(el("h3", "lesson-heading", block.body));
+  } else if (block.type === "cited") {
+    // The author's own quotation: shown as written, clearly labelled, with a check button.
+    const box = el("section", "box box-cited");
+    box.append(el("p", "cited-text", block.body));
+    if (block.attribution) box.append(el("p", "source-meta muted", block.attribution));
+    box.append(el("p", "small muted", block.indexed === false ? S.cited_not_indexed : S.cited_quote));
+    const b = el("button", "btn btn-ghost", S.check_this);
+    b.type = "button";
+    b.addEventListener("click", () => runCheck(block.body));
+    box.append(b);
+    wrap.append(box);
   } else if (block.type === "quran") {
     const box = el("section", "box box-source");
     box.append(el("div", "block-label", S.block_quran_label));

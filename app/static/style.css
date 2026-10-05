@@ -197,3 +197,9 @@ html[dir="ltr"] body { font-family: system-ui, "Segoe UI", Arial, var(--font-ui)
 .chip-btn { font: inherit; font-size: .9rem; border-radius: 999px; padding: 4px 14px; min-height: 36px; cursor: pointer;
   background: transparent; color: var(--muted); border: 1px solid var(--line); }
 .chip-btn[aria-pressed="true"] { background: var(--gold); color: var(--on-gold); border-color: var(--gold); }
+
+.lesson-text { white-space: pre-line; margin: 0; }
+.lesson-heading { color: var(--gold-strong); font-size: 1.1rem; margin: 18px 0 4px; }
+.box-cited { border: 1px dashed var(--warn); background: var(--surface); }
+.cited-text { font-size: 1.1rem; margin: 0 0 6px; }
+.block { margin: 10px 0; }
