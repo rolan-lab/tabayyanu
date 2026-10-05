@@ -19,6 +19,9 @@ What the tool does not do, and where it can be wrong. Kept honest on purpose.
 - **Salawat and narrator formulas** (صلى الله عليه وسلم, رضي الله عنه…) are ignored when comparing hadith, so their presence or absence is not reported.
 - **Long posts**: without a model, quotations are found from brackets and sentence punctuation; quotations run into the surrounding text without punctuation may be reported with extra words.
 
+- **Quotations shortened with «…»** are reported as `lexical_diff` (never `exact`); the tool does not yet treat «…» as a deliberate gap.
+- **English hadith translation** exists for 1,650 of the 2,484 indexed records (HadeethEnc's own coverage).
+
 ## Routing and AI
 
 - **Level routing uses fixed word lists** (`config.yaml`). It can miss a ruling question phrased differently, or route an ordinary question to a referral. The lists need review by a Sharia mentor.
@@ -34,5 +37,5 @@ What the tool does not do, and where it can be wrong. Kept honest on purpose.
 ## Licensing and operation
 
 - **King Fahd Complex Quran files have no explicit license grant** we could find; we use them as published for developers, unmodified and credited (SOURCES.md).
-- **Learning paths are empty** until the team adds reviewed content.
+- **Learning paths** are written by the team and converted by script; they still need review by a Sharia mentor (see docs/paths_conversion_report.md). Short dhikr phrases inside lesson sentences are not turned into reference blocks.
 - **Free hosting**: the app may sleep when idle and take some seconds to wake. Error reports are stored on the server's disk, which a free host may reset.

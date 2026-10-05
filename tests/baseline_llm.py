@@ -15,6 +15,7 @@ import json
 import re
 import sqlite3
 import sys
+import unicodedata
 from collections import Counter
 from pathlib import Path
 
@@ -42,11 +43,30 @@ SCHEMA = {"name": "judgement", "strict": True, "schema": {
 EXPECTED_VERDICT = {"exact": "authentic", "lexical_diff": "altered", "near_match": "altered", "not_found": "not_known"}
 
 
+def surah_key(name: str) -> str:
+    """Comparable form of a transliterated surah name: 'Al-Baqarah', 'al baqara', 'baqarah' -> 'baqara'."""
+    name = unicodedata.normalize("NFKD", name.lower())
+    name = "".join(ch for ch in name if ch.isalpha())
+    for prefix in ("al", "an", "ar", "as", "at", "ash", "az", "ad"):
+        if name.startswith(prefix) and len(name) > len(prefix) + 3:
+            name = name[len(prefix):]
+            break
+    return name.rstrip("h")
+
+
 def check_reference(ref: str, expected_ref: str, con) -> str:
-    """'ok', 'fabricated' (does not exist / wrong place) or 'none' (no reference given)."""
+    """'ok', 'fabricated' (does not exist / wrong place) or 'none' (no usable reference given)."""
     ref = (ref or "").strip().lower()
-    if not ref:
+    if not ref or ref in ("not_known", "unknown", "none", "n/a", "surah:ayah"):
         return "none"
+    ref = re.sub(r"^(?:surah|sura|quran)\s*:\s*", "", ref)  # e.g. "surah:21:52"
+    named = re.fullmatch(r"([a-z' -]+?)\s*:\s*(\d+)", ref)
+    if named and named.group(1).strip() not in ("bukhari", "muslim"):  # a surah given by name: resolve it with the KFGQPC English names
+        names = {surah_key(n): s for s, n in con.execute("SELECT DISTINCT surah, surah_name_en FROM quran_ayat")}
+        number = names.get(surah_key(named.group(1)))
+        if number is None:
+            return "fabricated"
+        ref = f"{number}:{named.group(2)}"
     m = re.fullmatch(r"(\d+):(\d+)(?:-(\d+))?", ref)
     if m:
         s, a = int(m.group(1)), int(m.group(2))
