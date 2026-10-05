@@ -133,5 +133,6 @@
   "guide_verify_hint": "Your question seems to contain a verse or hadith. You can check it with the verifier.",
   "guide_open_lesson": "Open lesson",
   "guide_error": "Search is unavailable right now; try again shortly.",
-  "guide_searching": "Searching the lessons…"
+  "guide_searching": "Searching the lessons…",
+  "guide_minimize": "Minimize"
 }

@@ -17,7 +17,10 @@
   panel.innerHTML = `
     <header class="guide-head">
       <h2 id="guide-title"></h2>
-      <button type="button" class="guide-close" aria-label="">✕</button>
+      <div class="guide-head-actions">
+        <button type="button" class="guide-close guide-min" aria-label="">–</button>
+        <button type="button" class="guide-close guide-x" aria-label="">✕</button>
+      </div>
     </header>
     <div class="guide-log" aria-live="polite"></div>
     <form class="guide-form">
@@ -33,7 +36,8 @@
     $(".guide-fab-label", fab).textContent = S.guide_button;
     fab.setAttribute("aria-label", S.guide_title);
     $("#guide-title", panel).textContent = S.guide_title;
-    $(".guide-close", panel).setAttribute("aria-label", S.guide_close);
+    $(".guide-x", panel).setAttribute("aria-label", S.guide_close);
+    $(".guide-min", panel).setAttribute("aria-label", S.guide_minimize);
     $("label", panel).textContent = S.guide_title;
     input.placeholder = S.guide_placeholder;
     $(".guide-form .btn", panel).textContent = S.guide_send;
@@ -97,7 +101,12 @@
   }
 
   fab.addEventListener("click", () => open(panel.hidden));
-  $(".guide-close", panel).addEventListener("click", () => open(false));
+  // Minimize keeps the conversation; close clears it.
+  $(".guide-min", panel).addEventListener("click", () => open(false));
+  $(".guide-x", panel).addEventListener("click", () => { open(false); applyGuideStrings(); });
+  document.addEventListener("click", e => {  // clicking outside the panel minimizes it
+    if (!panel.hidden && !panel.contains(e.target) && !fab.contains(e.target)) open(false);
+  });
   panel.addEventListener("keydown", e => { if (e.key === "Escape") open(false); });
   $(".guide-form", panel).addEventListener("submit", ask);
   document.addEventListener("langchange", applyGuideStrings);

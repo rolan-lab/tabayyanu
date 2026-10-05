@@ -133,5 +133,6 @@
   "guide_verify_hint": "يبدو أن سؤالك يتضمن آية أو حديثًا. يمكنك التحقق منه بأداة التحقق.",
   "guide_open_lesson": "افتح الدرس",
   "guide_error": "تعذّر البحث الآن، حاول بعد قليل.",
-  "guide_searching": "أبحث في الدروس…"
+  "guide_searching": "أبحث في الدروس…",
+  "guide_minimize": "تصغير"
 }

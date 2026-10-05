@@ -288,3 +288,7 @@ details > *:not(summary) { animation: rise-in .3s ease both; }
 nav { flex-wrap: wrap; align-items: center; row-gap: 6px; }
 html, body { overflow-x: clip; }
 @media (max-width: 420px) { nav { gap: 12px; font-size: .9rem; } }
+
+/* The panel uses display:flex, which would override the hidden attribute: hide it explicitly. */
+.guide-panel[hidden] { display: none; }
+.guide-head-actions { display: flex; gap: 4px; }
