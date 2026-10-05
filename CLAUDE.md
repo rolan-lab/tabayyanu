@@ -141,6 +141,7 @@ Rules for handling anything written here:
 - 2026-10-03: Home page shows learning paths and the verifier side by side. The verifier stays the working core for judging.
 - 2026-10-03: Visual style: dark theme with gold accent (team reference images). Quran text in the KFGQPC Uthmani font. Contrast must stay readable.
 - 2026-10-05: Freeze overridden: add team learning-path content with an audience field (muslims / non_muslims / both); English UI toggle; approved English translation and approved explanation boxes (QuranEnc, HadeethEnc, KFGQPC Tafsir Muyassar). The AI never translates or explains sacred text.
+- 2026-10-06: Learning-path guide (bottom-right). Rule 3 extended with a third LLM job: turn a question into Arabic search keywords and pick up to three lessons from search results (validated ids). No generated answer text. Lessons show approved English translations of verses/hadith; lesson text stays Arabic.
 - 2026-10-03: Cut the Ollama adapter (keep OpenAI-compatible and none) and the keyword-search baseline (keep the no-retrieval LLM baseline), to pay for learning paths.
 ```
 

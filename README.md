@@ -40,6 +40,7 @@ Questions asking for a ruling or about a personal case (organizers' levels C and
 4. **Hadith matcher** (`app/hadith.py`): FTS5 `bm25()` candidates, then containment and word-pair overlap, because quotations are usually fragments.
 5. **Routing** (`app/verify.py`): fixed word lists in `config.yaml` route ruling questions and personal cases to a referral.
 6. **LLM, two jobs only** (`app/llm/`): extract quotations from a long post (kept only if they are literal substrings of the input) and write a two-sentence explanation of the verdict computed by code. Outputs are validated; on any failure a fixed template is shown. The model can never change a status, reference or grade.
+8. **Learning-path guide** (`app/guide.py`): the corner assistant searches the lessons (SQLite FTS5 with light Arabic stemming). With a model, it only turns the question into Arabic keywords and picks up to three lessons from the results (validated ids); it never writes an answer.
 7. **Learning paths** (`content/paths.json`, `app/paths.py`): path → module → lesson. Lessons cite the Quran and hadith by reference only; the text always comes from the database. Progress stays in the visitor's browser. Format: [docs/PATHS_FORMAT.md](docs/PATHS_FORMAT.md).
 
 ## Run locally
@@ -72,6 +73,7 @@ python scripts/validate_paths.py      # learning-path content checks
 ## API
 
 - `POST /api/verify` `{"text": "..."}` → `{"items": [{kind, quote, level, status, source {type, ref, text, grade, grade_source, url}, diff, diff_notes, explanation, explanation_origin}], "level"}`
+- `POST /api/guide` `{"question": "...", "lang": "ar|en"}` → links to matching lessons with an excerpt of the lesson text (no generated answer); referral for ruling questions.
 - `GET /health`, `GET /api/meta`, `GET /api/paths`
 - `POST /api/report` — stores an error report only when `consent` is true.
 
