@@ -11,12 +11,15 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 PATHS_FILE = ROOT / "content" / "paths.json"
 AUDIENCES = {"muslims", "non_muslims", "both"}
+INLINE_MAX_WORDS = 7  # longer exact quotations in a text block must be reference blocks
 BLOCK_FIELDS = {
     "text": {"body"},
     "quran": {"surah", "ayah_from", "ayah_to"},
     "hadith": {"record_id"},
     "question": {"prompt", "options", "answer"},
     "check": {"body"},
+    "heading": {"body"},
+    "cited": {"body", "attribution"},  # a quotation kept as the team wrote it, with a check button
 }
 
 
@@ -69,7 +72,9 @@ def validate(data: dict, db_path: str, verifier=None) -> list[str]:
                     if kind in ("text", "question") and verifier is not None:
                         body = b.get("body") or b.get("prompt")
                         for item in verifier.verify(body)["items"]:
-                            if item.get("status") in ("exact", "lexical_diff"):
+                            # Short phrases inside a sentence (dhikr such as «رب اغفر لي», a list of
+                            # beliefs) may stay in the text; a typed verse or hadith must be a reference block.
+                            if item.get("status") == "exact" and len(item["quote"].split()) > INLINE_MAX_WORDS:
                                 problems.append(f"{bw}: contains typed {item['source']['type']} text "
                                                 f"({item['source']['ref']}); use a reference block")
     return problems
