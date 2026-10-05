@@ -13,6 +13,11 @@ python scripts/validate_paths.py
 3. A path is shown only when `"status": "published"`, after review by the Sharia mentor. Use `"draft"` while writing.
 4. Islamic-law lessons explain general rules from approved material. They never give a personal ruling (levels C and D).
 
+## Audience
+
+`"audience"` is `"muslims"`, `"non_muslims"` or `"both"` (default). The paths page has a filter;
+`both` paths appear under every filter.
+
 ## Structure
 
 ```json
@@ -23,6 +28,7 @@ python scripts/validate_paths.py
       "title": "عنوان المسار",
       "description": "وصف قصير",
       "level": "مبتدئ",
+      "audience": "both",
       "status": "draft",
       "sources": ["where the content comes from"],
       "modules": [

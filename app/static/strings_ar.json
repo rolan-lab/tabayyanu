@@ -95,5 +95,27 @@
   "report_send": "إرسال البلاغ",
   "report_need_consent": "لا يُحفظ البلاغ إلا بعد الموافقة.",
   "report_thanks": "شكرًا لك، وصلنا البلاغ وسيُراجع.",
-  "report_failed": "تعذّر إرسال البلاغ الآن. حاول لاحقًا."
+  "report_failed": "تعذّر إرسال البلاغ الآن. حاول لاحقًا.",
+  "collections": {
+    "bukhari": "صحيح البخاري",
+    "muslim": "صحيح مسلم"
+  },
+  "list_separator": "، ",
+  "box_meaning": "المعنى والترجمة من مصادر معتمدة",
+  "meaning_tafsir": "التفسير الميسر",
+  "meaning_translation_en": "الترجمة الإنجليزية لمعاني الآيات",
+  "meaning_hadith_explanation": "شرح الحديث",
+  "meaning_hadith_translation": "ترجمة الحديث إلى الإنجليزية",
+  "meaning_footnotes": "الحواشي",
+  "meaning_note": "نصوص التفسير والشرح والترجمة منقولة كما هي من مصادرها، دون تعديل ودون توليد آلي.",
+  "meaning_en_missing": "لا تتوفر ترجمة إنجليزية لهذا الحديث في المصدر.",
+  "lang_switch": "English",
+  "lang_switch_label": "Switch to English",
+  "audience": {
+    "all": "الكل",
+    "muslims": "للمسلمين",
+    "non_muslims": "لغير المسلمين",
+    "both": "للجميع"
+  },
+  "audience_label": "الفئة"
 }

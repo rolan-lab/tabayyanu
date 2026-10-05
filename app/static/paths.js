@@ -4,6 +4,7 @@
 
 const PROGRESS_KEY = "tabayyanu.progress.v1";
 let PATHS = [];
+let AUDIENCE = "all";  // filter: all | muslims | non_muslims
 
 function loadProgress() {
   try { return JSON.parse(localStorage.getItem(PROGRESS_KEY)) || {}; } catch { return {}; }
@@ -38,19 +39,39 @@ function progressBar(done, total) {
   return bar;
 }
 
+function audienceFilter() {
+  // "both" paths show under every filter.
+  const bar = el("div", "audience-filter");
+  bar.setAttribute("role", "group");
+  bar.setAttribute("aria-label", S.audience_label);
+  for (const key of ["all", "muslims", "non_muslims"]) {
+    const b = el("button", "chip-btn", S.audience[key]);
+    b.type = "button";
+    b.setAttribute("aria-pressed", String(AUDIENCE === key));
+    b.addEventListener("click", () => { AUDIENCE = key; renderGrid(); });
+    bar.append(b);
+  }
+  return bar;
+}
+
 function renderGrid() {
   const grid = $("#paths-grid");
   grid.textContent = "";
-  if (!PATHS.length) {
+  const filterSlot = $("#paths-filter");
+  if (filterSlot) filterSlot.replaceWith(Object.assign(audienceFilter(), { id: "paths-filter" }));
+  else grid.before(Object.assign(audienceFilter(), { id: "paths-filter" }));
+  const shown = PATHS.filter(p => AUDIENCE === "all" || (p.audience || "both") === "both" || p.audience === AUDIENCE);
+  if (!shown.length) {
     grid.append(el("div", "card path-card placeholder", S.paths_empty));
     return;
   }
   const progress = loadProgress();
-  for (const path of PATHS) {
+  for (const path of shown) {
     const card = el("a", "card path-card");
     card.href = `#/path/${encodeURIComponent(path.id)}`;
     card.append(el("h3", "", path.title));
     if (path.level) card.append(el("span", "chip", path.level));
+    card.append(el("span", "chip", S.audience[path.audience || "both"]));
     if (path.description) card.append(el("p", "muted", path.description));
     const { done, total } = pathProgress(path, progress);
     card.append(el("span", "small muted", fmt(S.path_progress, { done, total })), progressBar(done, total));
@@ -195,5 +216,6 @@ function route() {
     PATHS = (await (await fetch("/api/paths")).json()).paths;
   } catch { PATHS = []; }
   window.addEventListener("hashchange", route);
+  document.addEventListener("langchange", route);
   route();
 })();

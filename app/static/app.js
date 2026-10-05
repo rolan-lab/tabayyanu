@@ -1,8 +1,30 @@
 // Frontend for Tabayyanu. Plain JS, no build step.
 // All user and source text is inserted with textContent, never innerHTML.
 
-let S = {};          // Arabic UI strings (strings_ar.json)
+let S = {};          // UI strings for the current language (strings_ar.json / strings_en.json)
 let maxChars = 5000;
+let LANG = "ar";
+
+function savedLang() {
+  try { return localStorage.getItem("tabayyanu.lang") === "en" ? "en" : "ar"; } catch { return "ar"; }
+}
+
+async function setLang(lang) {
+  LANG = lang;
+  try { localStorage.setItem("tabayyanu.lang", lang); } catch { /* not saved in private mode */ }
+  S = await (await fetch(`/static/strings_${lang}.json`)).json();
+  document.documentElement.lang = lang;
+  document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+  document.title = lang === "ar" ? "تبيّنوا — التحقق من الآيات والأحاديث" : "Tabayyanu — verify verses and hadith";
+  applyStrings();
+  const btn = $("#lang-btn");
+  btn.textContent = S.lang_switch;
+  btn.setAttribute("aria-label", S.lang_switch_label);
+  btn.lang = lang === "ar" ? "en" : "ar";
+  $("#results").textContent = "";
+  setStatus("");
+  document.dispatchEvent(new Event("langchange"));
+}
 
 const $ = (sel, root = document) => root.querySelector(sel);
 
@@ -109,8 +131,83 @@ function renderItem(item) {
     item.diff_notes.forEach(n => notes.append(el("li", "", n)));
   }
   $(".note", node).textContent = item.note || "";
+  renderMeaning(item, node);
   $(".report-form", node).addEventListener("submit", e => sendReport(e, item));
   return node;
+}
+
+// Approved meaning and translation (database text, never generated). The reader's
+// language comes first; the other language is folded below.
+function renderMeaning(item, node) {
+  const m = item.meaning;
+  if (!m || (!m.explanation_ar && !m.translation_en)) return;
+  const box = $(".box-meaning", node);
+  const body = $(".meaning-body", box);
+  box.hidden = false;
+  const blocks = [];
+  if (m.explanation_ar) {
+    const sec = el("section", "meaning-part");
+    sec.lang = "ar"; sec.dir = "rtl";
+    sec.append(el("h4", "", item.source.type === "quran" ? S.meaning_tafsir : S.meaning_hadith_explanation));
+    if (m.explanation_ar.items) {
+      for (const a of m.explanation_ar.items) {
+        const p = el("p", "tafsir");
+        a.segments.forEach(seg => p.append(seg.aya ? el("span", "aya-seg", seg.text) : seg.text));
+        sec.append(p);
+      }
+    } else {
+      sec.append(el("p", "", m.explanation_ar.text));
+    }
+    sec.append(sourceLine(m.explanation_ar));
+    blocks.push(["ar", sec]);
+  }
+  const t = m.translation_en;
+  const en = el("section", "meaning-part");
+  en.lang = "en"; en.dir = "ltr";
+  if (t) {
+    en.append(el("h4", "", item.source.type === "quran" ? S.meaning_translation_en : S.meaning_hadith_translation));
+    if (t.items) {
+      for (const a of t.items) {
+        en.append(el("p", "", t.items.length > 1 ? `(${a.ayah}) ${a.text}` : a.text));
+        if (a.footnotes) {
+          const d = el("details", "footnotes");
+          d.append(el("summary", "", S.meaning_footnotes), el("p", "small", a.footnotes));
+          en.append(d);
+        }
+      }
+    } else {
+      if (t.title) en.append(el("p", "strong", t.title));
+      en.append(el("p", "", t.text));
+      if (t.explanation) {
+        const d = el("details", "footnotes");
+        d.append(el("summary", "", S.meaning_hadith_explanation), el("p", "", t.explanation));
+        en.append(d);
+      }
+    }
+    en.append(sourceLine(t));
+  } else if (item.source.type === "hadith") {
+    en.append(el("p", "muted small", S.meaning_en_missing));
+  }
+  if (en.childNodes.length) blocks.push(["en", en]);
+  // Reader's language first; the other one collapsed.
+  blocks.sort((a, b) => (a[0] === LANG ? -1 : 1) - (b[0] === LANG ? -1 : 1));
+  blocks.forEach(([lang, sec], i) => {
+    if (i === 0) { body.append(sec); return; }
+    const d = el("details", "meaning-more");
+    d.append(el("summary", "", sec.querySelector("h4")?.textContent || ""), sec);
+    body.append(d);
+  });
+}
+
+function sourceLine(part) {
+  const p = el("p", "source-meta muted");
+  p.append(part.source + " — ");
+  if (part.url) {
+    const a = el("a", "", S.label_source_link);
+    a.href = part.url; a.target = "_blank"; a.rel = "noopener";
+    p.append(a);
+  }
+  return p;
 }
 
 // Error report: sent only when the user ticks the consent box (nothing is stored otherwise).
@@ -147,7 +244,7 @@ async function verify() {
     const res = await fetch("/api/verify", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text }),
+      body: JSON.stringify({ text, lang: LANG }),
     });
     if (!res.ok) throw new Error("HTTP " + res.status);
     const data = await res.json();
@@ -163,8 +260,8 @@ async function verify() {
 }
 
 async function init() {
-  S = await (await fetch("/static/strings_ar.json")).json();
-  applyStrings();
+  await setLang(savedLang());
+  $("#lang-btn").addEventListener("click", () => setLang(LANG === "ar" ? "en" : "ar").then(showMotto));
   const input = $("#input");
   const counter = $("#counter");
   const updateCounter = () => { counter.textContent = `${input.value.length} / ${maxChars}`; };
@@ -177,10 +274,18 @@ async function init() {
     const meta = await (await fetch("/api/meta")).json();
     maxChars = meta.max_chars;
     updateCounter();
-    $("#motto-text").textContent = meta.motto.text;
-    $("#motto-ref").textContent = fmt(S.quran_ref_one, { surah: meta.motto.surah_name, from: meta.motto.ayah });
-    $("#motto").hidden = false;
+    window.META = meta;
+    showMotto();
   } catch (err) { /* motto is decorative; the tool still works */ }
+}
+
+function showMotto() {
+  const meta = window.META;
+  if (!meta) return;
+  $("#motto-text").textContent = meta.motto.text;  // the verse itself stays in Arabic
+  const name = LANG === "en" ? meta.motto.surah_name_en : meta.motto.surah_name;
+  $("#motto-ref").textContent = fmt(S.quran_ref_one, { surah: name, from: meta.motto.ayah });
+  $("#motto").hidden = false;
 }
 
 // Used by lessons: send a text to the verifier on the home page.

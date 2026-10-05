@@ -175,3 +175,25 @@ textarea:focus { border-color: var(--gold); }
 .consent input { margin-top: .45em; width: 18px; height: 18px; accent-color: var(--gold); }
 .report-status { min-height: 1.4em; margin: 0; color: var(--gold-strong); }
 .feedback.ok { color: var(--ok); }
+
+@font-face {
+  font-family: "KFGQPC Hafs Tafsir";
+  src: url("/static/fonts/uthmanic_hafs_v20.ttf") format("truetype");
+  font-display: swap;
+}
+.lang-btn { min-height: 36px; padding: 2px 14px; font-size: .9rem; }
+.box-meaning { border: 1px solid #2f4a3a; background: #141a16; margin-top: 12px; }
+.meaning-part h4 { margin: 0 0 6px; color: var(--ok); font-size: .95rem; font-weight: 500; }
+.meaning-part p { margin: 0 0 8px; }
+.tafsir { line-height: 2; }
+.aya-seg { font-family: "KFGQPC Hafs Tafsir", var(--font-quran); color: var(--gold-strong); }
+.footnotes, .meaning-more { margin: 4px 0 10px; }
+.footnotes summary, .meaning-more summary { cursor: pointer; color: var(--muted); font-size: .9rem; }
+.meaning-more { border-top: 1px dashed var(--line); padding-top: 8px; }
+.strong { font-weight: 700; }
+html[dir="ltr"] body { font-family: system-ui, "Segoe UI", Arial, var(--font-ui); }
+
+.audience-filter { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.chip-btn { font: inherit; font-size: .9rem; border-radius: 999px; padding: 4px 14px; min-height: 36px; cursor: pointer;
+  background: transparent; color: var(--muted); border: 1px solid var(--line); }
+.chip-btn[aria-pressed="true"] { background: var(--gold); color: var(--on-gold); border-color: var(--gold); }

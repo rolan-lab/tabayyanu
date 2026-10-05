@@ -10,6 +10,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 PATHS_FILE = ROOT / "content" / "paths.json"
+AUDIENCES = {"muslims", "non_muslims", "both"}
 BLOCK_FIELDS = {
     "text": {"body"},
     "quran": {"surah", "ayah_from", "ayah_to"},
@@ -39,6 +40,8 @@ def validate(data: dict, db_path: str, verifier=None) -> list[str]:
                 problems.append(f"{where}: missing '{key}'")
         if p.get("status") not in ("draft", "published"):
             problems.append(f"{where}: status must be 'draft' or 'published'")
+        if p.get("audience", "both") not in AUDIENCES:
+            problems.append(f"{where}: audience must be one of {sorted(AUDIENCES)}")
         if p.get("id") in seen:
             problems.append(f"{where}: duplicate id")
         seen.add(p.get("id"))
