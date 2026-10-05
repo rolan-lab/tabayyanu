@@ -59,7 +59,26 @@ def tokenize(text: str, flags: dict) -> list[Token]:
     for raw in (text or "").split():
         for part in strict(raw).split():
             tokens.append(Token(raw, part, fold(part, **flags)))
-    return tokens
+    return join_vocative(tokens, flags)
+
+
+def join_vocative(tokens: list[Token], flags: dict) -> list[Token]:
+    """The Mushaf texts always write vocative يا joined to the next word (ياأيها، ياقوم), and
+    people usually type it apart («يا أيها»). A standalone يا never occurs in the Quran data,
+    so joining it to the next word cannot create a false match."""
+    out = []
+    i = 0
+    while i < len(tokens):
+        t = tokens[i]
+        if t.strict == "يا" and i + 1 < len(tokens):
+            nxt = tokens[i + 1]
+            joined = t.strict + nxt.strict
+            out.append(Token(f"{t.display} {nxt.display}", joined, fold(joined, **flags)))
+            i += 2
+        else:
+            out.append(t)
+            i += 1
+    return out
 
 
 class QuranIndex:

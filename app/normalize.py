@@ -35,6 +35,9 @@ def strict(text: str) -> str:
     text = _DIACRITICS.sub("", text)
     text = text.translate(_ALEF_FORMS)
     text = _NON_LETTERS.sub(" ", text)
+    # The KFGQPC plain-spelling text writes «السموات» (182 times); people write «السماوات».
+    # Same word, two spellings; no other word contains «سموات».
+    text = text.replace("سموات", "سماوات")
     return _SPACES.sub(" ", text).strip()
 
 

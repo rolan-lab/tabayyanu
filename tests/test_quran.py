@@ -121,3 +121,17 @@ def test_partial_flag(verifier, ayat):
     words = emlaey.split()
     assert verifier.quran.match(emlaey).partial is False
     assert verifier.quran.match(" ".join(words[2:9])).partial is True
+
+
+def test_vocative_ya_typed_apart_is_exact(verifier, ayat):
+    """The Mushaf text joins vocative يا (ياأيها); people type it apart."""
+    s, a, _, emlaey = next(x for x in ayat if x[3].startswith("ياأيها") and len(x[3].split()) > 6)
+    m = verifier.quran.match(emlaey.replace("ياأيها", "يا أيها", 1))
+    assert m and m.status == "exact" and (m.surah, m.ayah_from) == (s, a)
+
+
+def test_modern_spelling_of_samawat_is_exact(verifier, db):
+    emlaey = db.execute("SELECT text_emlaey FROM quran_ayat WHERE surah = 2 AND ayah = 255").fetchone()[0]
+    assert "السموات" in emlaey
+    m = verifier.quran.match(emlaey.replace("السموات", "السماوات"))
+    assert m and m.status == "exact" and (m.surah, m.ayah_from) == (2, 255)
