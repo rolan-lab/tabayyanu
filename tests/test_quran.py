@@ -1,4 +1,5 @@
 """Quran matcher tests. Every input is built from database text."""
+import pytest
 from app.normalize import strict
 
 
@@ -135,3 +136,14 @@ def test_modern_spelling_of_samawat_is_exact(verifier, db):
     assert "السموات" in emlaey
     m = verifier.quran.match(emlaey.replace("السموات", "السماوات"))
     assert m and m.status == "exact" and (m.surah, m.ayah_from) == (2, 255)
+
+
+@pytest.mark.parametrize("surah,ayah,mushaf,modern", [
+    (2, 255, "يئوده", "يؤوده"),      # the case reported by the team
+    (2, 143, "لرءوف", "لرؤوف"),
+])
+def test_hamza_seat_spelling_is_exact(verifier, db, surah, ayah, mushaf, modern):
+    emlaey = db.execute("SELECT text_emlaey FROM quran_ayat WHERE surah = ? AND ayah = ?", (surah, ayah)).fetchone()[0]
+    assert mushaf in emlaey
+    m = verifier.quran.match(emlaey.replace(mushaf, modern))
+    assert m and m.status == "exact" and (m.surah, m.ayah_from) == (surah, ayah)

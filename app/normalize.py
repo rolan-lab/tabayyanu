@@ -24,6 +24,7 @@ _DIACRITICS = re.compile(
     "]"
 )
 _ALEF_FORMS = str.maketrans({"أ": "ا", "إ": "ا", "آ": "ا", "ٱ": "ا", "ٲ": "ا", "ٳ": "ا"})
+_HAMZA_SEATS = str.maketrans({"ؤ": "ء", "ئ": "ء"})
 # Anything that is not an Arabic letter or whitespace becomes a space
 # (punctuation, brackets, digits, Latin text).
 _NON_LETTERS = re.compile(r"[^ء-غف-ي\s]")
@@ -38,6 +39,9 @@ def strict(text: str) -> str:
     # The KFGQPC plain-spelling text writes «السموات» (182 times); people write «السماوات».
     # Same word, two spellings; no other word contains «سموات».
     text = text.replace("سموات", "سماوات")
+    # Hamza seat is a spelling convention: the Mushaf text writes «يئوده، رءوف، مسئولا»,
+    # people write «يؤوده، رؤوف، مسؤولا». Treat ء / ؤ / ئ as one letter, like the alef forms.
+    text = text.translate(_HAMZA_SEATS)
     return _SPACES.sub(" ", text).strip()
 
 
