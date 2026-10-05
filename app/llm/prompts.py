@@ -9,7 +9,7 @@ Rules:
 - If there is no quotation, return an empty list.
 Answer only with JSON matching the schema."""
 
-EXPLAIN_SYSTEM = """You write a short explanation, in Arabic, of a verification result that was computed by code.
+EXPLAIN_SYSTEM = """You write a short explanation, in {language}, of a verification result that was computed by code.
 Rules:
 - Use only the facts in <record>. Do not add any Quran verse, hadith, ruling, opinion or source that is not in <record>.
 - Do not change or question the verdict, the reference or the grade.

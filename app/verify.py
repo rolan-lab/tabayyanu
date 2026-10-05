@@ -12,11 +12,14 @@ import yaml
 
 from app.hadith import COLLECTION_NAMES, HadithIndex, HadithMatch
 from app.llm import get_llm
+from app.meaning import Meanings
 from app.normalize import folded, strict
 from app.quran import Quran, QuranMatch
 
 ROOT = Path(__file__).resolve().parent.parent
-STRINGS = json.loads((ROOT / "app" / "static" / "strings_ar.json").read_text(encoding="utf-8"))
+STRINGS_BY_LANG = {lang: json.loads((ROOT / "app" / "static" / f"strings_{lang}.json").read_text(encoding="utf-8"))
+                   for lang in ("ar", "en")}
+STRINGS = STRINGS_BY_LANG["ar"]
 CONFIG = yaml.safe_load((ROOT / "config.yaml").read_text(encoding="utf-8"))
 QURAN_URL = "https://qurancomplex.gov.sa/quran-dev/"
 
@@ -80,25 +83,25 @@ def clean_quote(text: str) -> str:
     return " ".join(raw)
 
 
-def quran_ref(surah_name: str, ayah_from: int, ayah_to: int) -> str:
+def quran_ref(surah_name: str, ayah_from: int, ayah_to: int, S: dict = STRINGS) -> str:
     key = "quran_ref_one" if ayah_from == ayah_to else "quran_ref_range"
-    return STRINGS[key].format(surah=surah_name, **{"from": ayah_from, "to": ayah_to})
+    return S[key].format(surah=surah_name, **{"from": ayah_from, "to": ayah_to})
 
 
-def diff_notes(diff: list[dict]) -> list[str]:
-    return [STRINGS["diff"][d["op"]].format(**d) for d in diff if d["op"] != "equal"]
+def diff_notes(diff: list[dict], S: dict = STRINGS) -> list[str]:
+    return [S["diff"][d["op"]].format(**d) for d in diff if d["op"] != "equal"]
 
 
-def template_explanation(status: str, ref: str = "", n: int = 0) -> str:
-    return STRINGS["explain_template"][status].format(ref=ref, n=n)
+def template_explanation(status: str, ref: str = "", n: int = 0, S: dict = STRINGS) -> str:
+    return S["explain_template"][status].format(ref=ref, n=n)
 
 
-def hadith_ref(m: HadithMatch) -> str:
+def hadith_ref(citations: list, S: dict = STRINGS) -> str:
     parts = []
-    for coll, number in m.citations:
+    for coll, number in citations:
         key = "hadith_citation" if number else "hadith_citation_no_number"
-        parts.append(STRINGS[key].format(collection=COLLECTION_NAMES[coll], number=number))
-    return "، ".join(parts)
+        parts.append(S[key].format(collection=S["collections"][coll], number=number))
+    return S["list_separator"].join(parts)
 
 
 def _markers(name: str) -> list[str]:
@@ -131,8 +134,9 @@ class Verifier:
         self.quran = Quran(db_path, CONFIG["normalize"], CONFIG["quran"])
         self.hadith = HadithIndex(db_path, CONFIG["normalize"], CONFIG["hadith"])
         self.llm = llm or get_llm()
+        self.meanings = Meanings(db_path)
 
-    def verify(self, text: str) -> dict:
+    def verify(self, text: str, lang: str = "ar") -> dict:
         text = (text or "").strip()
         if not strict(text):
             return {"items": [], "notice": "empty_input"}
@@ -150,15 +154,57 @@ class Verifier:
         else:
             items = [self.verify_quote(text, level)]  # report the text once, not per segment
         for item in items:
-            self.add_explanation(item)
-        return {"items": items, "level": level}
+            self.add_meaning(item)
+            if lang != "ar":
+                self.localize(item, STRINGS_BY_LANG[lang], lang)
+            self.add_explanation(item, lang)
+        return {"items": items, "level": level, "lang": lang}
 
-    def add_explanation(self, item: dict) -> None:
+    def add_meaning(self, item: dict) -> None:
+        """Approved explanation and translation from the database (never generated)."""
+        src = item.get("source")
+        if not src:
+            return
+        if src["type"] == "quran":
+            item["meaning"] = self.meanings.quran(src["surah"], src["ayah_from"], src["ayah_to"])
+        elif src["type"] == "hadith":
+            item["meaning"] = self.meanings.hadith(src["record_id"], src["url"])
+
+    def localize(self, item: dict, S: dict, lang: str) -> None:
+        """Rebuild every user-facing string of an item in another language from its structured data.
+        Status, references (numbers), grades and source texts are not changed."""
+        if item["kind"] != "quote":
+            item["status_label"] = S[f"kind_{item['kind']}"]
+            item["explanation"] = S[item["kind"]]
+            return
+        item["status_label"] = S["status"][item["status"]]
+        src = item.get("source")
+        if not src:
+            item["note"] = S["too_short_note"] if item.get("note_key") == "too_short" else S["not_found_note"]
+            item["explanation"] = template_explanation("not_found", S=S)
+            return
+        if src["type"] == "quran":
+            src["ref"] = quran_ref(self.quran.surah_name(src["surah"], lang), src["ayah_from"], src["ayah_to"], S)
+            src["name"] = S["quran_source_name"]
+            notes = [S["partial_note"]] if item.get("partial") else []
+            if item.get("also_in"):
+                refs = S["list_separator"].join(quran_ref(self.quran.surah_name(s, lang), a, b, S)
+                                                for s, a, b in item["also_in"])
+                notes.append(S["also_in"].format(refs=refs))
+            item["note"] = " ".join(notes) or None
+        else:
+            src["ref"] = hadith_ref(src["citations"], S)
+            src["name"] = S["hadith_source_name"]
+        item["diff_notes"] = diff_notes(item["diff"], S)
+        item["explanation"] = template_explanation(item["status"], src["ref"],
+                                                   sum(d["op"] != "equal" for d in item["diff"]), S)
+
+    def add_explanation(self, item: dict, lang: str = "ar") -> None:
         """LLM explanation for a found quotation; the template stays when the model is off or fails.
         The verdict fields are never touched here."""
         if item["kind"] != "quote" or item["status"] == "not_found":
             return
-        text = self.llm.explain(item["source"], item["status"], item["diff"], item["quote"])
+        text = self.llm.explain(item["source"], item["status"], item["diff"], item["quote"], lang)
         if text:
             item["explanation"] = text
             item["explanation_origin"] = "llm"
@@ -233,12 +279,13 @@ class Verifier:
         }
 
     def hadith_fields(self, m: HadithMatch) -> dict:
-        ref = hadith_ref(m)
+        ref = hadith_ref(m.citations)
         return {
             "status": m.status, "status_label": STRINGS["status"][m.status], "note": None,
             "source": {"type": "hadith", "ref": ref, "text": m.text, "grade": m.grade,
                        "grade_source": "HadeethEnc.com", "attribution": m.attribution,
-                       "name": STRINGS["hadith_source_name"], "url": m.url, "record_id": m.record_id},
+                       "name": STRINGS["hadith_source_name"], "url": m.url, "record_id": m.record_id,
+                       "citations": [list(c) for c in m.citations]},
             "diff": m.diff, "diff_notes": diff_notes(m.diff),
             "explanation": template_explanation(m.status, ref, sum(d["op"] != "equal" for d in m.diff)),
         }

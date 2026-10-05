@@ -1,7 +1,11 @@
 """Shared fixtures. All religious text in tests is read from the ingested database."""
+import os
 import random
 import sqlite3
 import sys
+
+# Unit tests never call a real model (no network, no cost); LLM behaviour is tested with a fake endpoint.
+os.environ["LLM_BACKEND"] = "none"
 from pathlib import Path
 
 import pytest

@@ -45,3 +45,8 @@ Each entry: date and time (Asia/Riyadh), what changed, why. `CLAUDE.md` is kept 
 - **What:** `data/vendor/kfgqpc_hafs_v30.zip`, the unmodified KFGQPC file (SHA-256 `227E6B15…F245`, as published). `scripts/ingest.py` tries the official URL first and falls back to this copy; either copy must match the published SHA-256 or the build stops (tested, including a one-byte tamper test).
 - **Why:** Render's build servers (Frankfurt) cannot connect to `download.qurancomplex.gov.sa` (connection timeout, 2026-10-04), so the deployment could not build. Not a mirror or another dataset: the same official file, verified by hash.
 - **Flag:** this redistributes the file through our public GitHub repository, beyond using and displaying it. The KFGQPC license is UNCLEAR (SOURCES.md). Decided by Rolan.
+
+## 2026-10-05 21:30 — Feature freeze overridden by the team (flag: time gate)
+- **What:** after the Mon 18:00 freeze, Rolan approved three additions: (1) learning-path content from the team's text files plus an audience field (Muslims / non-Muslims / both); (2) an English version of the interface; (3) approved English translations and approved explanations shown next to verified texts.
+- **Why:** team request. Not built: recommended-books page.
+- **Rules kept:** the AI does not translate or explain sacred text. Translations and explanations come from approved sources only, in their own box, labelled with the source: English Quran translation from QuranEnc (Association, reference file p. 9), hadith translation and شرح from HadeethEnc, Quran explanation from التفسير الميسر on the KFGQPC developer platform. Approved as new sources by Rolan (rule 11). The AI box stays a two-sentence note on the verdict.

@@ -12,8 +12,10 @@ import re
 
 from app.llm.prompts import EXPLAIN_SCHEMA, EXPLAIN_SYSTEM, EXTRACT_SCHEMA, EXTRACT_SYSTEM, wrap_user_text
 
-FALSE_WORDS = ("باطل", "موضوع", "مكذوب", "مزيف", "مختلق", "لا أصل له", "ضعيف")
-RULING_WORDS = ("يجوز", "حرام", "حلال", "يجب", "واجب", "مكروه", "فتوى", "أفتي")
+FALSE_WORDS = ("باطل", "موضوع", "مكذوب", "مزيف", "مختلق", "لا أصل له", "ضعيف",
+               "fabricated", "false", "fake", "forged", "weak", "baseless")
+RULING_WORDS = ("يجوز", "حرام", "حلال", "يجب", "واجب", "مكروه", "فتوى", "أفتي",
+                "permissible", "forbidden", "haram", "halal", "obligatory", "fatwa", "ruling")
 QUOTE_MARKS = re.compile(r"[﴿﴾«»\"“”{}]")
 
 
@@ -23,7 +25,7 @@ class NoLLM:
     def extract_quotes(self, text: str):
         return None
 
-    def explain(self, record: dict, verdict: str, diff: list, quote: str):
+    def explain(self, record: dict, verdict: str, diff: list, quote: str, lang: str = "ar"):
         return None
 
 
@@ -35,19 +37,20 @@ def validate_quotes(quotes, text: str) -> list[str] | None:
 
 
 # Claims of a full match, rejected when the computed status is not "exact".
-FULL_MATCH_CLAIMS = ("مطابق تماما", "مطابق تمامًا", "مطابق للمصدر", "لا يوجد اختلاف", "لا اختلاف", "بدون اختلاف")
+FULL_MATCH_CLAIMS = ("مطابق تماما", "مطابق تمامًا", "مطابق للمصدر", "لا يوجد اختلاف", "لا اختلاف", "بدون اختلاف",
+                     "exactly matches", "identical", "no difference", "fully matches", "matches the source exactly")
 
 
 def validate_explanation(value, status: str = "exact") -> str | None:
     if not isinstance(value, str):
         return None
-    if status != "exact" and any(c in value for c in FULL_MATCH_CLAIMS):
+    if status != "exact" and any(c in value.lower() for c in FULL_MATCH_CLAIMS):
         return None  # would contradict the verdict computed by code
     text = value.strip()
     sentences = [s for s in re.split(r"[.!؟?]+", text) if s.strip()]
     if not text or len(text) > 400 or len(sentences) > 2:
         return None
-    if QUOTE_MARKS.search(text) or any(w in text for w in FALSE_WORDS + RULING_WORDS):
+    if QUOTE_MARKS.search(text) or any(w in text.lower() for w in FALSE_WORDS + RULING_WORDS):
         return None
     return text
 

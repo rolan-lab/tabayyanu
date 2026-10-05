@@ -113,3 +113,11 @@ Dorar or Shamela.
 | KFGQPC Hafs Uthmanic font (`kfgqpc_hafs_v30.ttf`) | from the same KFGQPC package as source 1 | as source 1 (UNCLEAR, accepted) | Displaying Quran text; extracted at build time, not committed |
 | IBM Plex Sans Arabic (Google Fonts) | — | SIL Open Font License 1.1 | UI font, loaded from fonts.googleapis.com |
 | LLM endpoint (optional) | set by `LLM_MODEL` | provider's terms | Quote extraction and short explanations only; off by default |
+
+## 6. Approved meaning and translation (added 2026-10-05, approved by Rolan)
+
+| Source | What we take | Terms |
+|---|---|---|
+| **Tafsir al-Muyassar**, KFGQPC developer platform, `hafs_tafseerMouaser_v3.zip` (v3.0, updated 2023-01-08) | `aya_tafseer` for all 6,236 ayat, unchanged; font `uthmanic_hafs_v20.ttf` for verses quoted inside it. MD5 `b3870398…eac0c` and SHA-1 `a8f05441…b336` match the published values. Also bundled in `data/vendor/` (same reason as the Quran file). | The package panel states it is a service of the Complex "for developers, researchers and publishers to use in their applications". Clear for use in an app; bundling it in a public repo is redistribution (team decision, docs/CHANGES.md). |
+| **QuranEnc.com**, `english_saheeh` (Saheeh International, Noor International Center), version 1.1.2, API `/api/v1/translation/sura/english_saheeh/{n}` | Translation and footnotes for all 6,236 ayat, unchanged, with key and version shown in the UI. | API page terms: may be downloaded and re-published if not modified, the publisher and QuranEnc.com are credited, the version number is shown, the transcript information is kept, notes are reported to QuranEnc, the latest version is used, and no inappropriate ads. |
+| **HadeethEnc.com**, `explanation` (Arabic) and `hadeeths/multiple/?language=en` | Arabic شرح for all 2,484 indexed records; English title, text and explanation for the 1,650 records HadeethEnc has translated. | Same terms as source 2. |

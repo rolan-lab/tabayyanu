@@ -183,9 +183,12 @@ class Quran:
         self.flags = norm_flags
         self.indexes = [QuranIndex(db_path, norm_flags, cfg, col) for col in QuranIndex.COLUMNS]
         self.surah_names = {row[0]: row[1] for row in self.indexes[0].ayat}
+        con = sqlite3.connect(db_path)
+        self.surah_names_en = dict(con.execute("SELECT DISTINCT surah, surah_name_en FROM quran_ayat"))
+        con.close()
 
-    def surah_name(self, surah: int) -> str:
-        return self.surah_names[surah]
+    def surah_name(self, surah: int, lang: str = "ar") -> str:
+        return self.surah_names_en[surah] if lang == "en" else self.surah_names[surah]
 
     def match(self, text: str) -> QuranMatch | None:
         quote = tokenize(text, self.flags)

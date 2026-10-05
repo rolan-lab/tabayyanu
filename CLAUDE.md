@@ -140,6 +140,7 @@ Rules for handling anything written here:
 - 2026-10-03: Add learning paths (TryHackMe-style: path -> module -> lesson) for learning about Islam and Islamic law. Build the structure only; paths stay empty until the team supplies content. Lesson content comes only from the team, a mentor or approved sources; the AI never writes lessons or rulings. Progress is kept in the visitor's browser (localStorage), no accounts. Lessons can send a text to the verifier.
 - 2026-10-03: Home page shows learning paths and the verifier side by side. The verifier stays the working core for judging.
 - 2026-10-03: Visual style: dark theme with gold accent (team reference images). Quran text in the KFGQPC Uthmani font. Contrast must stay readable.
+- 2026-10-05: Freeze overridden: add team learning-path content with an audience field (muslims / non_muslims / both); English UI toggle; approved English translation and approved explanation boxes (QuranEnc, HadeethEnc, KFGQPC Tafsir Muyassar). The AI never translates or explains sacred text.
 - 2026-10-03: Cut the Ollama adapter (keep OpenAI-compatible and none) and the keyword-search baseline (keep the no-retrieval LLM baseline), to pay for learning paths.
 ```
 

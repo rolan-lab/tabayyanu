@@ -50,12 +50,13 @@ class OpenAICompat:
         out = self._call(EXTRACT_SYSTEM, wrap_user_text(text), EXTRACT_SCHEMA)
         return self._count(validate_quotes(out.get("quotes"), text) if isinstance(out, dict) else None, out)
 
-    def explain(self, record: dict, verdict: str, diff: list, quote: str) -> str | None:
+    def explain(self, record: dict, verdict: str, diff: list, quote: str, lang: str = "ar") -> str | None:
         facts = {"status": verdict, "reference": record.get("ref"), "source": record.get("name"),
                  "grade": record.get("grade"), "grade_source": record.get("grade_source"),
                  "changes": [d for d in diff if d.get("op") != "equal"][:8]}
         user = f"<record>\n{json.dumps(facts, ensure_ascii=False)}\n</record>\n{wrap_user_text(quote)}"
-        out = self._call(EXPLAIN_SYSTEM, user, EXPLAIN_SCHEMA)
+        language = "English" if lang == "en" else "Arabic"
+        out = self._call(EXPLAIN_SYSTEM.replace("{language}", language), user, EXPLAIN_SCHEMA)
         return self._count(validate_explanation(out.get("explanation"), verdict) if isinstance(out, dict) else None, out)
 
     def _count(self, value, raw):

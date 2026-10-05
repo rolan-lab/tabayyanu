@@ -54,9 +54,9 @@ async def lifespan(app: FastAPI):
         "hadith": con.execute("SELECT COUNT(*) FROM hadith").fetchone()[0],
     }
     # The site's motto verse (49:6), taken from the database like every other text.
-    surah_name, text = con.execute(
-        "SELECT surah_name_ar, text_raw FROM quran_ayat WHERE surah = 49 AND ayah = 6").fetchone()
-    state["motto"] = {"text": text, "surah_name": surah_name, "surah": 49, "ayah": 6}
+    surah_name, surah_name_en, text = con.execute(
+        "SELECT surah_name_ar, surah_name_en, text_raw FROM quran_ayat WHERE surah = 49 AND ayah = 6").fetchone()
+    state["motto"] = {"text": text, "surah_name": surah_name, "surah_name_en": surah_name_en, "surah": 49, "ayah": 6}
     con.close()
     include_drafts = os.environ.get("SHOW_DRAFT_PATHS") == "1"  # team preview only
     paths_file = Path(os.environ.get("PATHS_FILE", paths.PATHS_FILE))
@@ -71,13 +71,14 @@ app = FastAPI(title="Tabayyanu", lifespan=lifespan)
 
 class VerifyRequest(BaseModel):
     text: str = Field(..., max_length=MAX_CHARS)
+    lang: str = Field("ar", pattern="^(ar|en)$")
 
 
 @app.post("/api/verify")
 def verify(req: VerifyRequest):
     started = time.monotonic()
     try:
-        result = state["verifier"].verify(req.text)
+        result = state["verifier"].verify(req.text, req.lang)
     except Exception:
         log.exception("verify failed")  # message only; the input text is never logged
         raise HTTPException(status_code=500, detail="verify_failed")
