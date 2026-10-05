@@ -72,3 +72,21 @@ def test_report_requires_consent(tmp_path, monkeypatch):
         assert not (tmp_path / "reports.jsonl").exists()
         assert c.post("/api/report", json={"consent": True, "quote": "نص", "comment": "خطأ"}).json() == {"ok": True}
     assert (tmp_path / "reports.jsonl").read_text(encoding="utf-8").count("\n") == 1
+
+
+def test_examples_come_from_database_and_verify(db):
+    with TestClient(app) as c:
+        examples = {e["key"]: e["text"] for e in c.get("/api/examples").json()["examples"]}
+        assert set(examples) == {"ayah", "altered", "hadith", "post", "question"}
+        status = lambda t: [i["status"] or i["kind"] for i in c.post("/api/verify", json={"text": t}).json()["items"]]
+        assert status(examples["ayah"]) == ["exact"]
+        assert status(examples["altered"]) == ["lexical_diff"]
+        assert status(examples["hadith"]) == ["exact"]
+        assert status(examples["question"]) == ["referral"]
+
+
+def test_index_versions_assets_and_disables_cache():
+    with TestClient(app) as c:
+        r = c.get("/")
+    assert r.headers["cache-control"] == "no-cache"
+    assert "/static/app.js?v=" in r.text and "/static/style.css?v=" in r.text

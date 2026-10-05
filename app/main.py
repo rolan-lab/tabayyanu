@@ -2,6 +2,7 @@
 
 Stateless. No user text is stored or logged: logs hold counts and latency only.
 """
+import hashlib
 import json
 import logging
 import os
@@ -11,7 +12,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
@@ -58,6 +59,7 @@ async def lifespan(app: FastAPI):
     surah_name, surah_name_en, text = con.execute(
         "SELECT surah_name_ar, surah_name_en, text_raw FROM quran_ayat WHERE surah = 49 AND ayah = 6").fetchone()
     state["motto"] = {"text": text, "surah_name": surah_name, "surah_name_en": surah_name_en, "surah": 49, "ayah": 6}
+    state["examples"] = build_examples(con)
     con.close()
     include_drafts = os.environ.get("SHOW_DRAFT_PATHS") == "1"  # team preview only
     paths_file = Path(os.environ.get("PATHS_FILE", paths.PATHS_FILE))
@@ -120,9 +122,33 @@ def health():
     return {"status": "ok", "llm": llm, **state.get("counts", {})}
 
 
+def build_examples(con) -> list[dict]:
+    """Demo inputs built from database text (never typed by hand): a real ayah, the same ayah
+    with one word missing, a Sahih hadith, a post that quotes both, and a ruling question."""
+    words = con.execute("SELECT text_emlaey FROM quran_ayat WHERE surah = 2 AND ayah = 286").fetchone()[0].split()
+    ayah = " ".join(words[:14])
+    altered = " ".join(words[:5] + words[6:14])
+    hadith = con.execute("SELECT text_raw FROM hadith WHERE source_record_id = '5913' LIMIT 1").fetchone()[0]
+    matn = hadith[hadith.index("«") + 1:hadith.index("»")] if "«" in hadith else hadith
+    return [
+        {"key": "ayah", "text": ayah},
+        {"key": "altered", "text": altered},
+        {"key": "hadith", "text": matn},
+        {"key": "post", "text": f"انشروا هذا المنشور: قال تعالى ﴿{altered}﴾ وقال رسول الله صلى الله عليه وسلم «{matn}»"},
+        {"key": "question", "text": "هل يجوز لي أن أجمع الصلاة إذا كنت مسافرًا؟"},
+    ]
+
+
+@app.get("/api/examples")
+def examples():
+    return {"examples": state["examples"]}
+
+
 @app.get("/api/meta")
 def meta():
-    return {"motto": state["motto"], "max_chars": MAX_CHARS, **state["counts"]}
+    lessons = sum(len(m["lessons"]) for p in state["paths"] for m in p["modules"])
+    return {"motto": state["motto"], "max_chars": MAX_CHARS, "paths": len(state["paths"]), "lessons": lessons,
+            "hadith_records": len(state["verifier"].hadith.records), **state["counts"]}
 
 
 class GuideRequest(BaseModel):
@@ -145,9 +171,23 @@ def learning_paths():
     return {"paths": state["paths"]}
 
 
+def asset_version() -> str:
+    """Short hash of the static files, so browsers fetch new scripts and styles after a deploy."""
+    digest = hashlib.sha1()
+    for f in sorted(STATIC.glob("*.*")):
+        digest.update(f.read_bytes())
+    return digest.hexdigest()[:10]
+
+
+ASSET_VERSION = asset_version()
+
+
 @app.get("/")
 def index():
-    return FileResponse(STATIC / "index.html")
+    html = (STATIC / "index.html").read_text(encoding="utf-8")
+    for name in ("style.css", "app.js", "paths.js", "guide.js"):
+        html = html.replace(f"/static/{name}", f"/static/{name}?v={ASSET_VERSION}")
+    return HTMLResponse(html, headers={"Cache-Control": "no-cache"})
 
 
 app.mount("/static", StaticFiles(directory=STATIC), name="static")
