@@ -12,7 +12,7 @@ function savedLang() {
 async function setLang(lang) {
   LANG = lang;
   try { localStorage.setItem("tabayyanu.lang", lang); } catch { /* not saved in private mode */ }
-  S = await (await fetch(`/static/strings_${lang}.json`)).json();
+  S = await (await fetch(`/static/strings_${lang}.json`, { cache: "no-cache" })).json();
   document.documentElement.lang = lang;
   document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
   document.title = lang === "ar" ? "تبيّنوا — التحقق من الآيات والأحاديث" : "Tabayyanu — verify verses and hadith";
@@ -132,8 +132,59 @@ function renderItem(item) {
   }
   $(".note", node).textContent = item.note || "";
   renderMeaning(item, node);
+  const copyBtn = $(".copy-btn", node);
+  copyBtn.addEventListener("click", () => copyResult(item, copyBtn));
+  if (item.status === "not_found" && item.quote && item.quote.split(/\s+/).length >= 4) {
+    // Only a link: the text goes to Dorar only if the visitor clicks it.
+    const link = $(".dorar-link", node);
+    link.href = "https://dorar.net/hadith/search?q=" + encodeURIComponent(item.quote.slice(0, 300));
+    link.textContent = S.dorar_link;
+    link.title = S.dorar_link_note;
+    link.hidden = false;
+  }
   $(".report-form", node).addEventListener("submit", e => sendReport(e, item));
   return node;
+}
+
+// Plain-text summary of a result, for pasting back where the rumour was shared.
+async function copyResult(item, btn) {
+  const lines = [`${item.status_label}`];
+  if (item.source) lines.push(item.source.ref, item.source.text);
+  if (item.diff_notes && item.diff_notes.length) lines.push(...item.diff_notes);
+  if (item.note) lines.push(item.note);
+  lines.push(`— ${S.copy_footer}: ${location.origin}`);
+  try {
+    await navigator.clipboard.writeText(lines.join("\n"));
+    btn.textContent = S.copied;
+  } catch (err) {
+    btn.textContent = S.copy_failed;
+  }
+  setTimeout(() => { btn.textContent = S.copy_button; }, 2000);
+}
+
+async function loadExamples() {
+  try {
+    const { examples } = await (await fetch("/api/examples")).json();
+    window.EXAMPLES = examples;
+    renderExamples();
+  } catch (err) { /* examples are optional */ }
+}
+
+function renderExamples() {
+  const box = $("#examples");
+  if (!window.EXAMPLES) return;
+  box.querySelectorAll("button").forEach(b => b.remove());
+  for (const ex of window.EXAMPLES) {
+    const b = el("button", "chip-btn", S.examples[ex.key]);
+    b.type = "button";
+    b.addEventListener("click", () => {
+      $("#input").value = ex.text;
+      $("#input").dispatchEvent(new Event("input"));
+      verify();
+    });
+    box.append(b);
+  }
+  box.hidden = false;
 }
 
 // Approved meaning and translation (database text, never generated). The reader's
@@ -266,7 +317,7 @@ async function verify() {
 
 async function init() {
   await setLang(savedLang());
-  $("#lang-btn").addEventListener("click", () => setLang(LANG === "ar" ? "en" : "ar").then(showMotto));
+  $("#lang-btn").addEventListener("click", () => setLang(LANG === "ar" ? "en" : "ar").then(() => { showMotto(); renderExamples(); }));
   const input = $("#input");
   const counter = $("#counter");
   const updateCounter = () => { counter.textContent = `${input.value.length} / ${maxChars}`; };
@@ -281,6 +332,7 @@ async function init() {
     updateCounter();
     window.META = meta;
     showMotto();
+    loadExamples();
   } catch (err) { /* motto is decorative; the tool still works */ }
 }
 

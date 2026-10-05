@@ -228,6 +228,48 @@ function renderLesson(path, module, lesson, view) {
 
 // Page changes fade and slide in: the browser's View Transitions API where available,
 // otherwise a CSS entrance animation. Both are off when the user prefers reduced motion.
+function renderAbout(view) {
+  view.append(crumbs([S.paths_home, "#"]));
+  view.append(el("h1", "", S.about_title));
+  view.append(el("p", "lead", S.about_intro));
+  const steps = el("ol", "about-steps");
+  for (const [title, body] of S.about_steps) {
+    const li = el("li", "card");
+    li.append(el("h3", "", title), el("p", "", body));
+    steps.append(li);
+  }
+  view.append(steps);
+  if (window.META) {
+    view.append(el("h2", "", S.about_numbers));
+    view.append(el("p", "about-numbers", fmt(S.about_numbers_items, {
+      ayat: window.META.ayat.toLocaleString(), hadith: window.META.hadith_records.toLocaleString(),
+      lessons: window.META.lessons, paths: window.META.paths })));
+  }
+  view.append(el("h2", "", S.about_rules));
+  const rules = el("ul", "about-rules");
+  S.about_rules_items.forEach(r => rules.append(el("li", "", r)));
+  view.append(rules);
+  view.append(el("h2", "", S.about_sources));
+  view.append(el("p", "", S.footer_sources));
+  const more = el("a", "", S.about_more);
+  more.href = "https://github.com/rolan-lab/tabayyanu"; more.target = "_blank"; more.rel = "noopener";
+  view.append(el("p", "")).append(more);
+}
+
+function renderResources(view) {
+  view.append(crumbs([S.paths_home, "#"]));
+  view.append(el("h1", "", S.resources_title));
+  view.append(el("p", "lead", S.resources_intro));
+  const grid = el("div", "paths-grid");
+  for (const [title, url, desc] of S.resources) {
+    const a = el("a", "card path-card");
+    a.href = url; a.target = "_blank"; a.rel = "noopener";
+    a.append(el("h3", "", title), el("p", "muted", desc), el("span", "small", url.replace(/^https?:\/\//, "")));
+    grid.append(a);
+  }
+  view.append(grid);
+}
+
 function route() {
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (document.startViewTransition && !reduce && document.visibilityState === "visible") {
@@ -249,7 +291,7 @@ function animateIn(el) {
 function renderRoute() {
   const view = $("#path-view");
   const parts = location.hash.replace(/^#\/?/, "").split("/").map(decodeURIComponent);
-  const isPathRoute = parts[0] === "path" || parts[0] === "lesson";
+  const isPathRoute = ["path", "lesson", "about", "resources"].includes(parts[0]);
   $("#home").hidden = isPathRoute;
   view.hidden = !isPathRoute;
   animateIn(isPathRoute ? view : $("#home"));
@@ -258,7 +300,9 @@ function renderRoute() {
   const path = PATHS.find(p => p.id === parts[1]);
   const module = path && path.modules.find(m => m.id === parts[2]);
   const lesson = module && module.lessons.find(l => l.id === parts[3]);
-  if (parts[0] === "path" && path) renderPath(path, view);
+  if (parts[0] === "about") renderAbout(view);
+  else if (parts[0] === "resources") renderResources(view);
+  else if (parts[0] === "path" && path) renderPath(path, view);
   else if (parts[0] === "lesson" && lesson) renderLesson(path, module, lesson, view);
   else view.append(el("p", "", S.not_found_page), crumbs([S.paths_home, "#"]));
   window.scrollTo({ top: 0, behavior: "instant" });

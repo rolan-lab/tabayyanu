@@ -28,6 +28,8 @@
       <nav aria-label="القائمة الرئيسية">
         <a href="#verify" data-s="nav_verify"></a>
         <a href="#paths" data-s="nav_paths"></a>
+        <a href="#/about" data-s="nav_about"></a>
+        <a href="#/resources" data-s="nav_resources"></a>
         <button id="lang-btn" class="btn btn-ghost lang-btn" type="button" lang="en"></button>
       </nav>
     </div>
@@ -46,6 +48,9 @@
       <h2 id="verify-title" data-s="nav_verify"></h2>
       <label for="input" class="label" data-s="input_label"></label>
       <textarea id="input" rows="6" maxlength="5000" data-s-placeholder="input_placeholder"></textarea>
+      <div class="examples" id="examples" hidden>
+        <span class="small muted" data-s="examples_label"></span>
+      </div>
       <div class="row">
         <button id="verify-btn" class="btn btn-gold" type="button" data-s="verify_button"></button>
         <button id="clear-btn" class="btn btn-ghost" type="button" data-s="clear_button"></button>
@@ -102,6 +107,10 @@
         <ol class="diff-notes"></ol>
       </section>
       <p class="note"></p>
+      <div class="item-actions">
+        <button type="button" class="btn btn-ghost copy-btn" data-s="copy_button"></button>
+        <a class="dorar-link" target="_blank" rel="noopener" hidden></a>
+      </div>
       <details class="report">
         <summary data-s="report_button"></summary>
         <form class="report-form">

@@ -134,5 +134,90 @@
   "guide_open_lesson": "Open lesson",
   "guide_error": "Search is unavailable right now; try again shortly.",
   "guide_searching": "Searching the lessons…",
-  "guide_minimize": "Minimize"
+  "guide_minimize": "Minimize",
+  "nav_about": "How it works",
+  "nav_resources": "Resources",
+  "examples_label": "Try an example:",
+  "examples": {
+    "ayah": "A correct verse",
+    "altered": "A verse with a missing word",
+    "hadith": "A hadith from the Sahihs",
+    "post": "A viral post",
+    "question": "A fatwa question"
+  },
+  "copy_button": "Copy result",
+  "copied": "Copied ✓",
+  "copy_failed": "Could not copy",
+  "copy_footer": "Checked with Tabayyanu",
+  "dorar_link": "Search this text in Dorar al-Sunniyya's hadith encyclopedia",
+  "dorar_link_note": "Opens dorar.net in a new tab; your text is sent there only if you click.",
+  "about_title": "How does Tabayyanu work?",
+  "about_intro": "Tabayyanu does not write religious texts or guess: it matches the text you paste against approved sources word by word, then shows you the result, the source and the differences.",
+  "about_steps": [
+    [
+      "1. We find the quotations",
+      "Inside ﴿﴾ and «» brackets or in the post's sentences. AI may help find them, but only quotations copied exactly from your text are kept."
+    ],
+    [
+      "2. We normalise the spelling",
+      "Diacritics and recitation marks are ignored and alef and hamza forms unified, so a spelling difference is not taken for an alteration."
+    ],
+    [
+      "3. We match against the sources",
+      "The whole Mushaf (plain and Uthmani spelling) and the indexed hadith of the two Sahihs, compared word by word."
+    ],
+    [
+      "4. Fixed rules decide the verdict",
+      "Matches, matches with different wording, close to a known text, or not found. The AI can never change the verdict."
+    ],
+    [
+      "5. We show the source and meaning",
+      "The official source text, the differences in colour and in words, approved tafsir and translation, and a short generated note labelled as such."
+    ]
+  ],
+  "about_numbers": "What we index now",
+  "about_numbers_items": "{ayat} verses (Hafs) • {hadith} hadith from the two Sahihs • {lessons} lessons in {paths} paths",
+  "about_sources": "Sources",
+  "about_rules": "What we never do",
+  "about_rules_items": [
+    "We never write a verse or hadith from memory.",
+    "We do not issue fatwas or judge people.",
+    "We never call a text false or fabricated: we only say we did not find it in our sources.",
+    "We do not store the texts you enter."
+  ],
+  "about_more": "Full details, results and limitations are in the project's GitHub repository.",
+  "resources_title": "Useful resources",
+  "resources_intro": "Links to trusted platforms to learn more and verify. We point to them; we do not copy their content.",
+  "resources": [
+    [
+      "Widespread hadith that are not authentic — Dorar al-Sunniyya",
+      "https://dorar.net/fake-hadith",
+      "Common hadith reviewed by the site's scholars, with their ruling (Arabic)."
+    ],
+    [
+      "Hadith encyclopedia — Dorar al-Sunniyya",
+      "https://dorar.net/hadith",
+      "Search hadith with the scholars' rulings and sources (Arabic)."
+    ],
+    [
+      "Encyclopedia of Translated Hadiths (HadeethEnc)",
+      "https://hadeethenc.com/en",
+      "Authentic hadith with explanations and translations in many languages."
+    ],
+    [
+      "Quran Encyclopedia (QuranEnc)",
+      "https://quranenc.com/en",
+      "Approved translations of the meanings of the Quran in 80+ languages."
+    ],
+    [
+      "King Fahd Glorious Quran Printing Complex",
+      "https://qurancomplex.gov.sa/",
+      "The source of the Mushaf text we use, and Tafsir al-Muyassar."
+    ],
+    [
+      "Encyclopedia of Islamic Terms",
+      "https://terminologyenc.com/en",
+      "Definitions and translations of Islamic terms."
+    ]
+  ]
 }
