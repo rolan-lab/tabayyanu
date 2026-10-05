@@ -65,3 +65,8 @@ Each entry: date and time (Asia/Riyadh), what changed, why. `CLAUDE.md` is kept 
 ## 2026-10-06 01:40 — Hamza seats treated as one letter (reported by Rolan)
 - **What:** `strict()` maps ؤ and ئ to ء, so «يؤوده / يئوده», «رؤوف / رءوف», «مسؤولا / مسئولا» compare as the same word.
 - **Why:** Rolan found Ayat al-Kursi typed with «يؤوده» reported as a change; the KFGQPC plain-spelling text writes «يئوده», and about 60 words in the Mushaf text use the older hamza seat. Hamza seat is spelling, like the alef forms already unified. Rare words that differ only by hamza seat now compare equal; accepted as low risk. Tests, dev and test evaluations re-run: unchanged (100%, 0 critical errors).
+
+## 2026-10-06 02:50 — Examples, copy, "how it works", resources, Dorar link
+- **What:** example buttons built from database text; a copy-result button; a "how it works" page (method, sources, numbers, limits); a resources page with links only; on `not_found` results, a link that opens the visitor's text in Dorar al-Sunniyya's own hadith search (only if they click).
+- **Why:** team asked for a richer site after reviewing hdith.com.
+- **Considered and rejected:** showing Dorar's rulings inside our results through its live API. A test showed Dorar's keyword search can return a *different* hadith that shares words, which could make a fabricated text look authentic next to it; Dorar's terms are also unclear and the demo would depend on an external service. Linking out carries none of these risks. Dorar's curated «أحاديث منتشرة لا تصح» list is linked, not copied.

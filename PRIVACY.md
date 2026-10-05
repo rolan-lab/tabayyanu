@@ -12,6 +12,10 @@
 
 - Questions typed into the guide are not stored. When the model is enabled, the question is sent to the model provider only to pick search keywords and lessons.
 
+## Links to other sites
+
+- When a text is not found, the result offers a link to search it in Dorar al-Sunniyya's encyclopedia. Your text is sent to dorar.net only if you click that link.
+
 ## Error reports
 
 - The "report an error" form saves a case **only if you tick the consent box**. The server refuses a report without consent.
