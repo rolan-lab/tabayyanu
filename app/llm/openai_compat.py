@@ -11,6 +11,19 @@ from app.llm.prompts import EXPLAIN_SCHEMA, EXPLAIN_SYSTEM, EXTRACT_SCHEMA, EXTR
 log = logging.getLogger("tabayyanu.llm")
 TIMEOUT_S = 15
 
+# Plain-language change types, so the model cannot confuse which side a word is missing from.
+CHANGE_TYPES = {
+    "replace": "the user's quote has a different word than the source",
+    "insert": "extra word in the user's quote, not in the source",
+    "delete": "word in the source that is missing from the user's quote",
+    "spelling": "same word, spelled differently in the user's quote",
+}
+
+
+def describe_change(d: dict) -> dict:
+    return {"type": CHANGE_TYPES[d["op"]], "user_quote_has": d.get("quote") or None,
+            "source_has": d.get("source") or None}
+
 
 class OpenAICompat:
     name = "openai_compat"
@@ -53,7 +66,7 @@ class OpenAICompat:
     def explain(self, record: dict, verdict: str, diff: list, quote: str, lang: str = "ar") -> str | None:
         facts = {"status": verdict, "reference": record.get("ref"), "source": record.get("name"),
                  "grade": record.get("grade"), "grade_source": record.get("grade_source"),
-                 "changes": [d for d in diff if d.get("op") != "equal"][:8]}
+                 "changes": [describe_change(d) for d in diff if d.get("op") != "equal"][:8]}
         user = f"<record>\n{json.dumps(facts, ensure_ascii=False)}\n</record>\n{wrap_user_text(quote)}"
         language = "English" if lang == "en" else "Arabic"
         out = self._call(EXPLAIN_SYSTEM.replace("{language}", language), user, EXPLAIN_SCHEMA)
