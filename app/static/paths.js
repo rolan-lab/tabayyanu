@@ -116,6 +116,22 @@ function renderPath(path, view) {
   }
 }
 
+// Approved English translation of a verse or hadith (QuranEnc / HadeethEnc), open in English
+// mode and folded in Arabic mode. The Arabic text above it never changes.
+function englishPart(tr, label) {
+  const frag = document.createDocumentFragment();
+  if (!tr) return frag;
+  const d = el("details", "lesson-en");
+  d.open = LANG === "en";
+  d.lang = "en"; d.dir = "ltr";
+  d.append(el("summary", "", label));
+  if (tr.items) tr.items.forEach(a => d.append(el("p", "", tr.items.length > 1 ? `(${a.ayah}) ${a.text}` : a.text)));
+  else d.append(el("p", "", tr.text));
+  d.append(sourceLine(tr));
+  frag.append(d);
+  return frag;
+}
+
 function renderBlock(block) {
   const wrap = el("div", "block");
   if (block.type === "text") {
@@ -137,10 +153,12 @@ function renderBlock(block) {
     const box = el("section", "box box-source");
     box.append(el("div", "block-label", S.block_quran_label));
     box.append(el("blockquote", "quran", block.text || ""));
+    const name = LANG === "en" ? block.surah_name_en : block.surah_name;
     const ref = block.ayah_from === block.ayah_to
-      ? fmt(S.quran_ref_one, { surah: block.surah_name, from: block.ayah_from })
-      : fmt(S.quran_ref_range, { surah: block.surah_name, from: block.ayah_from, to: block.ayah_to });
+      ? fmt(S.quran_ref_one, { surah: name, from: block.ayah_from })
+      : fmt(S.quran_ref_range, { surah: name, from: block.ayah_from, to: block.ayah_to });
     box.append(el("p", "source-meta muted", `${ref} — ${S.quran_source_name}`));
+    box.append(englishPart(block.translation_en, S.meaning_translation_en));
     wrap.append(box);
   } else if (block.type === "hadith") {
     const box = el("section", "box box-source");
@@ -149,6 +167,7 @@ function renderBlock(block) {
     const meta = [block.attribution, block.grade ? `${S.label_grade}: ${block.grade} (${block.grade_source})` : ""]
       .filter(Boolean).join(" • ");
     box.append(el("p", "source-meta muted", meta));
+    box.append(englishPart(block.translation_en, S.meaning_hadith_translation));
     wrap.append(box);
   } else if (block.type === "question") {
     const q = el("fieldset", "question card");
@@ -182,6 +201,7 @@ function renderBlock(block) {
 function renderLesson(path, module, lesson, view) {
   view.append(crumbs([S.paths_home, "#"], [path.title, `#/path/${encodeURIComponent(path.id)}`]));
   view.append(el("h1", "", lesson.title));
+  if (LANG === "en") view.append(el("p", "note-en muted small", S.lesson_text_arabic_note));
   lesson.blocks.forEach(b => view.append(renderBlock(b)));
 
   const key = lessonKey(path, module, lesson);
@@ -210,8 +230,14 @@ function renderLesson(path, module, lesson, view) {
 // otherwise a CSS entrance animation. Both are off when the user prefers reduced motion.
 function route() {
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if (document.startViewTransition && !reduce) document.startViewTransition(renderRoute);
-  else renderRoute();
+  if (document.startViewTransition && !reduce && document.visibilityState === "visible") {
+    const t = document.startViewTransition(renderRoute);
+    // A transition can be skipped (e.g. the tab is hidden); the page is still rendered.
+    t.ready.catch(() => {});
+    t.finished.catch(() => {});
+  } else {
+    renderRoute();
+  }
 }
 
 function animateIn(el) {

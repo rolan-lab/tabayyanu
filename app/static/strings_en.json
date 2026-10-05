@@ -119,5 +119,19 @@
   },
   "audience_label": "Audience",
   "cited_not_indexed": "Not verified in our indexed sources. You can check it or consult its source.",
-  "cited_quote": "A quotation given by the lesson's author; you can check it."
+  "cited_quote": "A quotation given by the lesson's author; you can check it.",
+  "lesson_text_arabic_note": "The lesson text is in Arabic. Verses and hadith include an approved English translation (open the English section under each).",
+  "guide_button": "Path guide",
+  "guide_title": "Learning-path guide",
+  "guide_intro": "Ask about a topic and I'll point you to the right lessons in our paths. I don't issue fatwas or write religious texts.",
+  "guide_placeholder": "e.g. How do I perform wudu?",
+  "guide_send": "Search",
+  "guide_close": "Close",
+  "guide_found": "These lessons from our paths may help (lessons are in Arabic):",
+  "guide_none": "I couldn't find a matching lesson. Try other words, or browse the paths.",
+  "guide_empty": "Type your question or the topic you want to learn.",
+  "guide_verify_hint": "Your question seems to contain a verse or hadith. You can check it with the verifier.",
+  "guide_open_lesson": "Open lesson",
+  "guide_error": "Search is unavailable right now; try again shortly.",
+  "guide_searching": "Searching the lessons…"
 }

@@ -97,12 +97,17 @@ def resolve(data: dict, db_path: str, verifier, include_drafts: bool = False) ->
                             " ORDER BY ayah", (b["surah"], b["ayah_from"], b["ayah_to"])).fetchall()
                         b["text"] = " ".join(r[1] for r in rows)
                         b["surah_name"] = rows[0][0] if rows else None
+                        b["surah_name_en"] = verifier.quran.surah_name(b["surah"], "en")
+                        b["translation_en"] = verifier.meanings.quran(
+                            b["surah"], b["ayah_from"], b["ayah_to"])["translation_en"]
                     elif b.get("type") == "hadith":
                         rec = verifier.hadith.records.get(str(b["record_id"]))
                         if rec:
                             b.update({"text": rec["text"], "grade": rec["grade"], "grade_source": "HadeethEnc.com",
                                       "attribution": rec["attribution"], "url": rec["url"],
                                       "citations": rec["citations"]})
+                            b["translation_en"] = verifier.meanings.hadith(str(b["record_id"]), rec["url"]).get(
+                                "translation_en")
         out.append(p)
     con.close()
     return out
