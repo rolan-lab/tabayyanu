@@ -35,15 +35,17 @@ PATHS = [
     {"folder": "Muslims", "id": "muslim-basics", "title": "أساسيات الدين للمسلم", "audience": "muslims",
      "description": "الشهادتان والإيمان والطهارة والصلاة والسيرة النبوية وموضوعات تهم المسلم.",
      "order": ["الشهادتان في الإسلام", "الايمان", "طريقة الوضوء الصحيحة", "الصلاة في الإسلام",
-               "لسيرة النبوية", "مواضيع تهم المسلمين"]},
+               "لسيرة النبوية", "مواضيع تهم المسلمين"], "art": "mihrab",
+     "module_art": {"الايمان": "star", "طريقة الوضوء الصحيحة": "water", "الصلاة في الإسلام": "mihrab",
+                    "لسيرة النبوية": "dome"}},
     {"folder": "nonMuslums", "id": "discover-islam", "title": "تعرّف على الإسلام", "audience": "non_muslims",
      "description": "أسئلة يطرحها غير المسلمين عن الإسلام، ونظرة الإسلام إلى الإنسان والصحة النفسية.",
-     "order": ["بعد المواضيع الجدليه تهم غير المسلمين", "الإسلام والصحة النفسية والعلاج النف"]},
+     "order": ["بعد المواضيع الجدليه تهم غير المسلمين", "الإسلام والصحة النفسية والعلاج النف"], "art": "book"},
     # These two files describe a planned Hajj/Umrah assistant rather than lessons: kept as a draft
     # (not shown on the site) until the team decides.
     {"folder": "Muslims", "id": "hajj-umrah-draft", "title": "الحج والعمرة (مسودة)", "audience": "muslims",
      "description": "مسودة: وصف لمساعد ذكي للحج والعمرة، بانتظار قرار الفريق.", "status": "draft",
-     "order": ["الحج", "العمره"]},
+     "order": ["الحج", "العمره"], "art": "kaaba", "module_art": {"الحج": "kaaba", "العمره": "kaaba"}},
 ]
 SEPARATOR = "⸻"
 VERSE = re.compile(r"﴿(.+?)﴾\s*\[\s*([^\]:\d]+?)\s*:\s*([\d٠-٩]+)\s*(?:[-–]\s*([\d٠-٩]+))?\s*\]\s*\.?", re.S)
@@ -245,11 +247,15 @@ class Converter:
                 file_title = name if ORDINAL.match(first) else first  # a file without a title line
                 self.report.append(f"\n### {spec['folder']}/{name}.txt → module “{file_title}”\n")
                 lessons = self.lessons(text, file_title)
-                modules.append({"id": f"m{len(modules) + 1:02d}", "title": file_title, "lessons": lessons,
-                                "source_file": f"content/source/{spec['folder']}/{name}.txt"})
+                module = {"id": f"m{len(modules) + 1:02d}", "title": file_title, "lessons": lessons,
+                          "source_file": f"content/source/{spec['folder']}/{name}.txt"}
+                if name in spec.get("module_art", {}):
+                    module["art"] = spec["module_art"][name]  # decorative illustration (app/static/art.js)
+                modules.append(module)
                 self.report.append(f"\n{len(lessons)} lessons.")
             paths.append({"id": spec["id"], "title": spec["title"], "description": spec["description"],
                           "audience": spec["audience"], "status": spec.get("status", "published"),
+                          "art": spec.get("art"),
                           "level": "مبتدئ", "sources": ["محتوى كتبه فريق تبيّنوا (content/source/)"],
                           "modules": modules})
         data = json.loads(OUT.read_text(encoding="utf-8")) if OUT.exists() else {}

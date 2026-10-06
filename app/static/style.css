@@ -304,3 +304,44 @@ html, body { overflow-x: clip; }
 .about-steps p { margin: 0; }
 .about-numbers { font-size: 1.15rem; color: var(--gold-strong); }
 .about-rules li { margin: 4px 0; }
+
+/* ---- Illustrations (app/static/art.js) ---- */
+.art { flex: none; display: grid; place-items: center; }
+.art-sm { width: 52px; height: 52px; }
+.art-md { width: 84px; height: 84px; }
+.art-lg { width: 130px; height: 130px; }
+.art-svg { width: 100%; height: 100%; overflow: visible; }
+.art-line { fill: none; stroke: var(--gold); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.art-thin { stroke-width: 1.4; opacity: .8; }
+.art-band { fill: var(--gold); stroke: var(--gold-strong); stroke-width: 1; }
+.art-fill-dark { fill: #121212; stroke: var(--gold); stroke-width: 2.4; stroke-linejoin: round; }
+.art-fill-green { fill: rgba(123, 211, 137, .18); }
+.art-door { fill: rgba(217, 178, 95, .55); stroke: var(--gold-strong); stroke-width: 1; }
+.art-drop { fill: rgba(140, 200, 240, .35); stroke: #9fd3f2; stroke-width: 1.6; }
+.art-glow { fill: rgba(217, 178, 95, .22); filter: blur(4px); }
+.path-card .art { margin-bottom: 4px; }
+.path-hero { display: flex; align-items: center; gap: 18px; margin-bottom: 8px; }
+.path-hero h1 { margin: 0; }
+.module-head { display: flex; align-items: center; gap: 12px; }
+.module-head h2 { margin: 0; }
+
+.art-kaaba .art-glow { animation: art-pulse 4s ease-in-out infinite; }
+.art-sway { transform-origin: 60px 25px; animation: art-sway 5s ease-in-out infinite; }
+.art-mihrab .art-glow { animation: art-pulse 3s ease-in-out infinite; }
+.art-d1, .art-d2, .art-d3 { animation: art-drop 2.6s ease-in infinite; }
+.art-d2 { animation-delay: .8s; } .art-d3 { animation-delay: 1.6s; }
+.art-ripple { animation: art-pulse 2.6s ease-in-out infinite; }
+.art-float { animation: art-float 6s ease-in-out infinite; }
+.art-spin { transform-origin: 60px 60px; animation: art-spin 40s linear infinite; }
+@keyframes art-pulse { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }
+@keyframes art-sway { 0%, 100% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } }
+@keyframes art-drop { 0% { transform: translateY(-6px); opacity: 0; } 20% { opacity: 1; } 85% { opacity: 1; } 100% { transform: translateY(34px); opacity: 0; } }
+@keyframes art-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+@keyframes art-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .art-glow, .art-sway, .art-drop, .art-ripple, .art-float, .art-spin { animation: none !important; }
+}
+@media (max-width: 520px) { .art-lg { width: 90px; height: 90px; } .path-hero { gap: 12px; } }
+
+.path-card .chip { align-self: flex-start; }
+.path-card .art { align-self: flex-start; }

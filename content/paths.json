@@ -11,6 +11,7 @@
    "description": "الشهادتان والإيمان والطهارة والصلاة والسيرة النبوية وموضوعات تهم المسلم.",
    "audience": "muslims",
    "status": "published",
+   "art": "mihrab",
    "level": "مبتدئ",
    "sources": [
     "محتوى كتبه فريق تبيّنوا (content/source/)"
@@ -1090,7 +1091,8 @@
        ]
       }
      ],
-     "source_file": "content/source/Muslims/الايمان.txt"
+     "source_file": "content/source/Muslims/الايمان.txt",
+     "art": "star"
     },
     {
      "id": "m03",
@@ -1141,7 +1143,8 @@
        ]
       }
      ],
-     "source_file": "content/source/Muslims/طريقة الوضوء الصحيحة.txt"
+     "source_file": "content/source/Muslims/طريقة الوضوء الصحيحة.txt",
+     "art": "water"
     },
     {
      "id": "m04",
@@ -1334,7 +1337,8 @@
        ]
       }
      ],
-     "source_file": "content/source/Muslims/الصلاة في الإسلام.txt"
+     "source_file": "content/source/Muslims/الصلاة في الإسلام.txt",
+     "art": "mihrab"
     },
     {
      "id": "m05",
@@ -2633,7 +2637,8 @@
        ]
       }
      ],
-     "source_file": "content/source/Muslims/لسيرة النبوية.txt"
+     "source_file": "content/source/Muslims/لسيرة النبوية.txt",
+     "art": "dome"
     },
     {
      "id": "m06",
@@ -3780,6 +3785,7 @@
    "description": "أسئلة يطرحها غير المسلمين عن الإسلام، ونظرة الإسلام إلى الإنسان والصحة النفسية.",
    "audience": "non_muslims",
    "status": "published",
+   "art": "book",
    "level": "مبتدئ",
    "sources": [
     "محتوى كتبه فريق تبيّنوا (content/source/)"
@@ -5617,6 +5623,7 @@
    "description": "مسودة: وصف لمساعد ذكي للحج والعمرة، بانتظار قرار الفريق.",
    "audience": "muslims",
    "status": "draft",
+   "art": "kaaba",
    "level": "مبتدئ",
    "sources": [
     "محتوى كتبه فريق تبيّنوا (content/source/)"
@@ -6741,7 +6748,8 @@
        ]
       }
      ],
-     "source_file": "content/source/Muslims/الحج.txt"
+     "source_file": "content/source/Muslims/الحج.txt",
+     "art": "kaaba"
     },
     {
      "id": "m02",
@@ -7992,7 +8000,8 @@
        ]
       }
      ],
-     "source_file": "content/source/Muslims/العمره.txt"
+     "source_file": "content/source/Muslims/العمره.txt",
+     "art": "kaaba"
     }
    ]
   }

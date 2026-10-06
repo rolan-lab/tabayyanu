@@ -185,7 +185,7 @@ ASSET_VERSION = asset_version()
 @app.get("/")
 def index():
     html = (STATIC / "index.html").read_text(encoding="utf-8")
-    for name in ("style.css", "app.js", "paths.js", "guide.js"):
+    for name in ("style.css", "app.js", "art.js", "paths.js", "guide.js"):
         html = html.replace(f"/static/{name}", f"/static/{name}?v={ASSET_VERSION}")
     return HTMLResponse(html, headers={"Cache-Control": "no-cache"})
 

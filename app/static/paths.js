@@ -69,6 +69,8 @@ function renderGrid() {
   for (const path of shown) {
     const card = el("a", "card path-card");
     card.href = `#/path/${encodeURIComponent(path.id)}`;
+    const art = path.art && artNode(path.art, "md");
+    if (art) card.append(art);
     card.append(el("h3", "", path.title));
     if (path.level) card.append(el("span", "chip", path.level));
     card.append(el("span", "chip", S.audience[path.audience || "both"]));
@@ -94,13 +96,23 @@ function crumbs(...links) {
 function renderPath(path, view) {
   const progress = loadProgress();
   view.append(crumbs([S.paths_home, "#"], [S.paths_title, "#paths"]));
-  view.append(el("h1", "", path.title));
-  if (path.description) view.append(el("p", "muted", path.description));
+  const head = el("div", "path-hero");
+  const heroArt = path.art && artNode(path.art, "lg");
+  if (heroArt) head.append(heroArt);
+  const heroText = el("div");
+  heroText.append(el("h1", "", path.title));
+  if (path.description) heroText.append(el("p", "muted", path.description));
+  head.append(heroText);
+  view.append(head);
   const { done, total } = pathProgress(path, progress);
   view.append(el("p", "small muted", fmt(S.path_progress, { done, total })), progressBar(done, total));
   for (const module of path.modules) {
     const sec = el("section", "module card");
-    sec.append(el("h2", "", module.title));
+    const mhead = el("div", "module-head");
+    const mart = module.art && artNode(module.art, "sm");
+    if (mart) mhead.append(mart);
+    mhead.append(el("h2", "", module.title));
+    sec.append(mhead);
     const list = el("ol", "lesson-list");
     for (const lesson of module.lessons) {
       const a = el("a");
@@ -200,7 +212,11 @@ function renderBlock(block) {
 
 function renderLesson(path, module, lesson, view) {
   view.append(crumbs([S.paths_home, "#"], [path.title, `#/path/${encodeURIComponent(path.id)}`]));
-  view.append(el("h1", "", lesson.title));
+  const lhead = el("div", "path-hero");
+  const lart = module.art && artNode(module.art, "md");
+  if (lart) lhead.append(lart);
+  lhead.append(el("h1", "", lesson.title));
+  view.append(lhead);
   if (LANG === "en") view.append(el("p", "note-en muted small", S.lesson_text_arabic_note));
   lesson.blocks.forEach(b => view.append(renderBlock(b)));
 
